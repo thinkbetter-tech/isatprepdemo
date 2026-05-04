@@ -1,0 +1,144 @@
+/* Auth pages — login & signup */
+.auth-page{min-height:100vh; display:grid; grid-template-columns: 1fr 1fr; background:var(--bg);}
+@media (max-width: 900px){.auth-page{grid-template-columns:1fr;}}
+
+.auth-form-side{
+  display:flex; flex-direction:column;
+  padding:32px 48px 48px;
+  min-height:100vh;
+}
+@media (max-width: 600px){.auth-form-side{padding:24px 24px 32px;}}
+
+.auth-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:auto;}
+.auth-top .switch{font-size:14px; color:var(--ink-soft);}
+.auth-top .switch a{color:var(--navy); font-weight:600; border-bottom:1px solid var(--amber);}
+.auth-top .switch a:hover{color:var(--amber-deep);}
+
+.auth-form-wrap{
+  width:100%; max-width:420px; margin:48px auto;
+}
+.auth-form-wrap h1{
+  font-size:clamp(36px, 4.4vw, 52px); line-height:1.05; letter-spacing:-0.025em;
+  margin-bottom:14px; font-weight:400;
+}
+.auth-form-wrap .lede{
+  color:var(--ink-soft); font-size:16px; margin-bottom:36px;
+}
+
+.auth-form{display:flex; flex-direction:column; gap:18px;}
+
+.field{display:flex; flex-direction:column; gap:7px;}
+.field label{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--ink-soft); font-weight:500;
+}
+.field input{
+  height:48px; padding:0 16px; border-radius:8px;
+  border:1px solid var(--rule); background:#fff; color:var(--ink);
+  font:16px/1 var(--sans);
+  transition:border-color .15s, box-shadow .15s;
+  width:100%;
+}
+.field input:focus{
+  outline:none; border-color:var(--navy);
+  box-shadow:0 0 0 3px rgba(21,38,71,0.08);
+}
+.field .hint{font-size:12px; color:var(--muted); margin-top:2px;}
+.field .error{font-size:13px; color:#B91C1C; margin-top:2px;}
+
+.field-row{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.field-row .forgot{font-size:13px; color:var(--ink-soft);}
+.field-row .forgot:hover{color:var(--amber-deep);}
+
+.checkbox{display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--ink-soft); line-height:1.5;}
+.checkbox input{margin-top:2px; accent-color:var(--navy); width:16px; height:16px;}
+.checkbox a{color:var(--navy); border-bottom:1px solid var(--rule);}
+.checkbox a:hover{border-color:var(--amber);}
+
+.divider{
+  display:flex; align-items:center; gap:14px;
+  font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--muted); margin:6px 0;
+}
+.divider::before, .divider::after{
+  content:""; flex:1; height:1px; background:var(--rule);
+}
+
+.btn-google{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  height:48px; border-radius:8px;
+  border:1px solid var(--rule); background:#fff; color:var(--ink);
+  font:600 15px var(--sans); cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.btn-google:hover{border-color:var(--navy); background:var(--bg-2);}
+
+.auth-bottom{margin-top:auto; padding-top:32px; font-size:12px; color:var(--muted); display:flex; gap:18px; flex-wrap:wrap;}
+.auth-bottom a{color:var(--ink-soft);}
+.auth-bottom a:hover{color:var(--navy);}
+
+/* Editorial side */
+.auth-side{
+  background:var(--navy); color:#E8ECF4;
+  padding:48px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  position:relative; overflow:hidden;
+  min-height:100vh;
+}
+@media (max-width: 900px){.auth-side{display:none;}}
+
+.auth-side::before{
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(800px 400px at 80% 10%, rgba(245,158,11,0.08), transparent 60%),
+    radial-gradient(600px 300px at 10% 90%, rgba(245,158,11,0.05), transparent 60%);
+  pointer-events:none;
+}
+
+.auth-side-top{display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1;}
+.auth-side-top .brand{color:#fff;}
+.auth-side-top .brand-mark{border-color:#fff; color:#fff; background:transparent;}
+.auth-side-top .home-link{font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.55);}
+.auth-side-top .home-link:hover{color:#fff;}
+
+.auth-quote-block{position:relative; z-index:1; max-width:480px;}
+.auth-quote-block .eyebrow{color:rgba(255,255,255,0.55);}
+.auth-quote-block h2{
+  color:#fff; font-size:clamp(28px, 2.6vw, 40px);
+  line-height:1.15; letter-spacing:-0.02em; font-weight:400;
+  margin:18px 0 28px;
+}
+.auth-quote-block h2 em{color:var(--amber); font-style:normal;}
+.auth-quote-block .meta{
+  display:flex; gap:32px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.12);
+}
+.auth-quote-block .meta div{font-size:13px; color:rgba(255,255,255,0.65);}
+.auth-quote-block .meta strong{display:block; font-family:var(--serif); font-weight:500; font-size:22px; color:#fff; line-height:1; margin-bottom:6px;}
+
+.auth-side-diagram{
+  position:absolute; right:-40px; top:50%; transform:translateY(-50%);
+  width:520px; opacity:0.18; pointer-events:none;
+}
+
+/* Plan picker (signup) */
+.plan-pick{display:flex; flex-direction:column; gap:8px;}
+.plan-opt{
+  display:flex; align-items:center; gap:14px;
+  padding:14px 16px; border:1px solid var(--rule); border-radius:10px;
+  background:#fff; cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.plan-opt:hover{border-color:var(--navy);}
+.plan-opt.sel{border-color:var(--amber); background:#FFFCF4; box-shadow:0 0 0 3px rgba(245,158,11,0.1);}
+.plan-opt input{accent-color:var(--amber); width:16px; height:16px; flex-shrink:0;}
+.plan-opt .pname{font-family:var(--serif); font-size:17px; color:var(--navy); font-weight:500;}
+.plan-opt .pdesc{font-size:13px; color:var(--ink-soft);}
+.plan-opt .pprice{margin-left:auto; font-family:var(--mono); font-size:13px; color:var(--ink); font-weight:500;}
+.plan-opt .pprice b{font-family:var(--serif); font-size:18px; font-weight:500;}
+
+.password-strength{display:flex; gap:4px; margin-top:6px;}
+.password-strength span{height:3px; flex:1; background:var(--rule); border-radius:2px; transition:background .2s;}
+.password-strength.s1 span:nth-child(1){background:#DC2626;}
+.password-strength.s2 span:nth-child(-n+2){background:#F59E0B;}
+.password-strength.s3 span:nth-child(-n+3){background:#10B981;}
+.password-strength.s4 span{background:#10B981;}

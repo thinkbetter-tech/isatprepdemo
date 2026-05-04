@@ -1,0 +1,252 @@
+// Login & signup forms
+
+const GoogleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18">
+    <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.49h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.63z"/>
+    <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26a5.4 5.4 0 0 1-3.04.85 5.36 5.36 0 0 1-5-3.7H.96v2.32A9 9 0 0 0 9 18z"/>
+    <path fill="#FBBC05" d="M4 10.71a5.4 5.4 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08L4 10.7z"/>
+    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.34l2.58-2.58A9 9 0 0 0 9 0C5.48 0 2.44 2 .96 4.96L4 7.29A5.36 5.36 0 0 1 9 3.58z"/>
+  </svg>
+);
+
+function AuthBrand() {
+  return (
+    <a href="index.html" className="brand">
+      <span className="brand-mark">i</span>
+      <span>iSATPrep</span>
+    </a>
+  );
+}
+
+function AuthSide({ mode }) {
+  return (
+    <aside className="auth-side">
+      <div className="auth-side-top">
+        <AuthBrand />
+        <a href="index.html" className="home-link">← Back to home</a>
+      </div>
+
+      <svg className="auth-side-diagram" viewBox="0 0 480 480" aria-hidden="true">
+        <path d="M70 90 Q 50 90 50 110 V 370 Q 50 390 70 390" stroke="#fff" strokeWidth="1.5" fill="none"/>
+        <path d="M410 90 Q 430 90 430 110 V 370 Q 430 390 410 390" stroke="#fff" strokeWidth="1.5" fill="none"/>
+        <line x1="80" y1="220" x2="400" y2="220" stroke="#fff" strokeWidth="1"/>
+        <line x1="80" y1="226" x2="400" y2="226" stroke="#fff" strokeWidth="1"/>
+        <text x="240" y="180" textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="64" fill="#F59E0B">f(x)</text>
+        <text x="240" y="290" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="14" fill="#fff" letterSpacing="6">METHOD</text>
+      </svg>
+
+      <div className="auth-quote-block">
+        <span className="eyebrow">{mode === "signup" ? "Welcome aboard" : "Welcome back"}</span>
+        <h2>
+          {mode === "signup"
+            ? <>You don't do English the English way — you do it the <em>math</em> way.</>
+            : <>The method is waiting. Pick up where you <em>left off</em>.</>
+          }
+        </h2>
+        <div className="meta">
+          <div><strong>+100 pts</strong>Avg. R&W gain</div>
+          <div><strong>8</strong>Skill modules</div>
+          <div><strong>Self-paced</strong>Cancel anytime</div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function LoginForm() {
+  const [email, setEmail] = React.useState("");
+  const [pw, setPw] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [err, setErr] = React.useState(null);
+
+  const submit = (e) => {
+    e.preventDefault();
+    setErr(null);
+    if (!email || !pw) { setErr("Please enter email and password."); return; }
+    setSubmitting(true);
+    setTimeout(() => {
+      setSubmitting(false);
+      // Demo: just navigate to practice
+      window.location.href = "practice.html";
+    }, 700);
+  };
+
+  return (
+    <div className="auth-form-side" data-screen-label="Login">
+      <div className="auth-top">
+        <div className="auth-top-left" style={{display:"none"}}><AuthBrand /></div>
+        <div></div>
+        <div className="switch">
+          New here? <a href="signup.html">Create an account</a>
+        </div>
+      </div>
+
+      <div className="auth-form-wrap">
+        <h1 className="serif">Log in.</h1>
+        <p className="lede">Welcome back. Let's get back to the method.</p>
+
+        <form className="auth-form" onSubmit={submit} noValidate>
+          <button type="button" className="btn-google" onClick={() => alert("Google sign-in (demo)")}>
+            <GoogleIcon /> Continue with Google
+          </button>
+
+          <div className="divider">or with email</div>
+
+          <div className="field">
+            <label htmlFor="email">Email</label>
+            <input id="email" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" />
+          </div>
+
+          <div className="field">
+            <div className="field-row">
+              <label htmlFor="pw">Password</label>
+              <a href="#" className="forgot">Forgot?</a>
+            </div>
+            <input id="pw" type="password" value={pw} onChange={(e)=>setPw(e.target.value)} placeholder="••••••••" autoComplete="current-password" />
+          </div>
+
+          {err && <div className="error" style={{fontSize:13, color:"#B91C1C"}}>{err}</div>}
+
+          <label className="checkbox">
+            <input type="checkbox" defaultChecked />
+            <span>Keep me signed in on this device</span>
+          </label>
+
+          <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={submitting}>
+            {submitting ? "Signing in…" : <>Log in <span className="btn-arrow">→</span></>}
+          </button>
+        </form>
+      </div>
+
+      <div className="auth-bottom">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="mailto:hello@isatprep.com">hello@isatprep.com</a>
+        <span style={{marginLeft:"auto"}}>© 2026 iSATPrep</span>
+      </div>
+    </div>
+  );
+}
+
+function SignupForm() {
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [pw, setPw] = React.useState("");
+  const [plan, setPlan] = React.useState("free");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [err, setErr] = React.useState(null);
+
+  const strength = (() => {
+    if (!pw) return 0;
+    let s = 0;
+    if (pw.length >= 8) s++;
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
+    if (/\d/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    return s;
+  })();
+
+  // Initial plan from query string ?plan=core|complete|free
+  React.useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("plan");
+    if (p && ["free","core","complete"].includes(p)) setPlan(p);
+  }, []);
+
+  const submit = (e) => {
+    e.preventDefault();
+    setErr(null);
+    if (!name || !email || !pw) { setErr("Please fill out all fields."); return; }
+    if (pw.length < 8) { setErr("Password must be at least 8 characters."); return; }
+    setSubmitting(true);
+    setTimeout(() => {
+      setSubmitting(false);
+      window.location.href = "practice.html";
+    }, 800);
+  };
+
+  const PLANS = [
+    {id:"free",     name:"Free",     desc:"Sample of Words in Context",  price:"$0",  per:""},
+    {id:"core",     name:"Core",     desc:"All 6 Reading topics",         price:"$59", per:"/mo"},
+    {id:"complete", name:"Complete", desc:"All 8 topics + practice tests", price:"$99", per:"/mo"},
+  ];
+
+  return (
+    <div className="auth-form-side" data-screen-label="Signup">
+      <div className="auth-top">
+        <div></div>
+        <div className="switch">
+          Already a member? <a href="login.html">Log in</a>
+        </div>
+      </div>
+
+      <div className="auth-form-wrap">
+        <h1 className="serif">Create your account.</h1>
+        <p className="lede">Free to start. Cancel anytime. No credit card for the free plan.</p>
+
+        <form className="auth-form" onSubmit={submit} noValidate>
+          <button type="button" className="btn-google" onClick={() => alert("Google sign-up (demo)")}>
+            <GoogleIcon /> Sign up with Google
+          </button>
+
+          <div className="divider">or with email</div>
+
+          <div className="field">
+            <label htmlFor="name">Full name</label>
+            <input id="name" type="text" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Jane Doe" autoComplete="name" />
+          </div>
+
+          <div className="field">
+            <label htmlFor="email2">Email</label>
+            <input id="email2" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" />
+          </div>
+
+          <div className="field">
+            <label htmlFor="pw2">Password</label>
+            <input id="pw2" type="password" value={pw} onChange={(e)=>setPw(e.target.value)} placeholder="At least 8 characters" autoComplete="new-password" />
+            <div className={"password-strength s" + strength}>
+              <span/><span/><span/><span/>
+            </div>
+            <div className="hint">8+ characters, mix of letters, numbers, and a symbol for best strength.</div>
+          </div>
+
+          <div className="field">
+            <label>Choose a plan</label>
+            <div className="plan-pick">
+              {PLANS.map(p => (
+                <label key={p.id} className={"plan-opt" + (plan === p.id ? " sel" : "")}>
+                  <input type="radio" name="plan" value={p.id} checked={plan === p.id} onChange={() => setPlan(p.id)} />
+                  <div>
+                    <div className="pname">{p.name}</div>
+                    <div className="pdesc">{p.desc}</div>
+                  </div>
+                  <div className="pprice"><b>{p.price}</b>{p.per}</div>
+                </label>
+              ))}
+            </div>
+            <div className="hint">You can change or cancel any time.</div>
+          </div>
+
+          {err && <div className="error" style={{fontSize:13, color:"#B91C1C"}}>{err}</div>}
+
+          <label className="checkbox">
+            <input type="checkbox" defaultChecked />
+            <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</span>
+          </label>
+
+          <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={submitting}>
+            {submitting ? "Creating account…" : <>Create account <span className="btn-arrow">→</span></>}
+          </button>
+        </form>
+      </div>
+
+      <div className="auth-bottom">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="mailto:hello@isatprep.com">hello@isatprep.com</a>
+        <span style={{marginLeft:"auto"}}>© 2026 iSATPrep</span>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { AuthSide, LoginForm, SignupForm });
