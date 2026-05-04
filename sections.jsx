@@ -433,7 +433,7 @@ function Footer() {
           </div>
           <div>
             <h4>Contact</h4>
-            <a href="mailto:hello@isatprep.com">hello@isatprep.com</a>
+            <a href="mailto:hello@isatprep.net">hello@isatprep.net</a>
             <a href="#">Twitter / X</a>
             <a href="#">Instagram</a>
           </div>

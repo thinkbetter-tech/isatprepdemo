@@ -121,7 +121,7 @@ function LoginForm() {
       <div className="auth-bottom">
         <a href="#">Privacy</a>
         <a href="#">Terms</a>
-        <a href="mailto:hello@isatprep.com">hello@isatprep.com</a>
+        <a href="mailto:hello@isatprep.net">hello@isatprep.net</a>
         <span style={{marginLeft:"auto"}}>© 2026 iSATPrep</span>
       </div>
     </div>
@@ -242,7 +242,7 @@ function SignupForm() {
       <div className="auth-bottom">
         <a href="#">Privacy</a>
         <a href="#">Terms</a>
-        <a href="mailto:hello@isatprep.com">hello@isatprep.com</a>
+        <a href="mailto:hello@isatprep.net">hello@isatprep.net</a>
         <span style={{marginLeft:"auto"}}>© 2026 iSATPrep</span>
       </div>
     </div>
