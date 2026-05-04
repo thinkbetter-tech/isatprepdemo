@@ -11,8 +11,8 @@ const TESTIMONIALS = [
 ];
 
 const TOPICS = [
-  { n: 1, name: "Words in Context", desc: "Decode vocabulary in any passage", tier: "59" },
-  { n: 2, name: "Text Structure & Purpose", desc: "Understand how passages are built", tier: "free", href: "practice.html" },
+  { n: 1, name: "Text Structure & Purpose", desc: "Understand how passages are built", tier: "free", href: "practice.html" },
+  { n: 2, name: "Words in Context", desc: "Decode vocabulary in any passage", tier: "59" },
   { n: 3, name: "Cross-Text Connections", desc: "Compare and link multiple texts", tier: "59" },
   { n: 4, name: "Central Ideas & Details", desc: "Find the main point, fast", tier: "59" },
   { n: 5, name: "Inferences", desc: "Read between the lines with precision", tier: "59" },
