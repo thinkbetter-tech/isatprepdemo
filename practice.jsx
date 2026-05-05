@@ -114,8 +114,7 @@ function TopicHeader({ unlocked, total }) {
         <a href="index.html#topics" style={{fontFamily:"var(--mono)", fontSize:12, color:"var(--ink-soft)", letterSpacing:"0.06em", textTransform:"uppercase"}}>← All topics</a>
         <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-end", gap:32, marginTop:18, flexWrap:"wrap"}}>
           <div style={{flex:"1 1 480px"}}>
-            <span className="eyebrow">Topic 02 · Free sample</span>
-            <h1 style={{fontSize:"clamp(36px,4.4vw,56px)", marginTop:14, lineHeight:1.05}}>Text Structure & Purpose</h1>
+            <h1 style={{fontSize:"clamp(36px,4.4vw,56px)", lineHeight:1.05}}>Text Structure & Purpose</h1>
             <p className="body-text" style={{marginTop:14, maxWidth:"56ch"}}>
               Understand how passages are built — claim, evidence, qualifier, transition.
               Apply the method, predict the answer, eliminate the rest. {unlocked} questions are unlocked for free practice.
@@ -317,8 +316,7 @@ function LockedRail() {
       <div className="wrap">
         <div className="locked-head">
           <div>
-            <span className="eyebrow" style={{color:"var(--ink-soft)"}}>96 questions locked</span>
-            <h2 style={{marginTop:10}}>Unlock the full bank.</h2>
+            <h2>Unlock the full bank.</h2>
             <p className="body-text" style={{maxWidth:"54ch", marginTop:8}}>
               The free sample is just the start. Unlock 96 more graded practice questions across structure, purpose, and transitions.
             </p>

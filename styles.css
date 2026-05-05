@@ -394,6 +394,15 @@ footer .brand-mark{border-color:#fff; color:#fff; background:transparent;}
 .walk-meta .kicker{font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber-deep);}
 .walk-meta h3{font-size:20px;}
 .walk-meta p{margin:0; color:var(--ink-soft); font-size:14px;}
+.walk-card--placeholder{cursor:default;}
+.walk-card--placeholder:hover{border-color:var(--rule); transform:none; box-shadow:none;}
+.walk-placeholder{
+  position:absolute; inset:0;
+  display:grid; place-items:center;
+  font-family:var(--mono); font-size:12px; letter-spacing:0.14em; text-transform:uppercase;
+  color:rgba(255,255,255,0.55);
+  background:repeating-linear-gradient(45deg, #0F1E3D 0 12px, #142446 12px 24px);
+}
 
 /* MODAL */
 .modal-backdrop{

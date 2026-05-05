@@ -77,48 +77,48 @@
 .auth-bottom a{color:var(--ink-soft);}
 .auth-bottom a:hover{color:var(--navy);}
 
-/* Editorial side */
+/* Editorial side — chapter-opener treatment */
 .auth-side{
-  background:var(--navy); color:#E8ECF4;
-  padding:48px;
-  display:flex; flex-direction:column; justify-content:space-between;
-  position:relative; overflow:hidden;
+  background:var(--bg);
+  border-left:1px solid var(--rule);
+  padding:32px 64px 48px;
+  display:flex; flex-direction:column;
+  position:relative;
   min-height:100vh;
 }
 @media (max-width: 900px){.auth-side{display:none;}}
 
-.auth-side::before{
-  content:""; position:absolute; inset:0;
-  background:
-    radial-gradient(800px 400px at 80% 10%, rgba(245,158,11,0.08), transparent 60%),
-    radial-gradient(600px 300px at 10% 90%, rgba(245,158,11,0.05), transparent 60%);
-  pointer-events:none;
+.auth-side-top{display:flex; align-items:center; justify-content:space-between;}
+.auth-side-top .home-link{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--ink-soft);
 }
+.auth-side-top .home-link:hover{color:var(--navy);}
 
-.auth-side-top{display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1;}
-.auth-side-top .brand{color:#fff;}
-.auth-side-top .brand-mark{border-color:#fff; color:#fff; background:transparent;}
-.auth-side-top .home-link{font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.55);}
-.auth-side-top .home-link:hover{color:#fff;}
-
-.auth-quote-block{position:relative; z-index:1; max-width:480px;}
-.auth-quote-block .eyebrow{color:rgba(255,255,255,0.55);}
-.auth-quote-block h2{
-  color:#fff; font-size:clamp(28px, 2.6vw, 40px);
-  line-height:1.15; letter-spacing:-0.02em; font-weight:400;
-  margin:18px 0 28px;
+.auth-editorial{
+  margin:auto 0; max-width:520px;
+  display:flex; flex-direction:column; gap:28px;
 }
-.auth-quote-block h2 em{color:var(--amber); font-style:normal;}
-.auth-quote-block .meta{
-  display:flex; gap:32px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.12);
+.auth-chapter{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--ink-soft);
+  display:inline-flex; align-items:center; gap:12px;
 }
-.auth-quote-block .meta div{font-size:13px; color:rgba(255,255,255,0.65);}
-.auth-quote-block .meta strong{display:block; font-family:var(--serif); font-weight:500; font-size:22px; color:#fff; line-height:1; margin-bottom:6px;}
-
-.auth-side-diagram{
-  position:absolute; right:-40px; top:50%; transform:translateY(-50%);
-  width:520px; opacity:0.18; pointer-events:none;
+.auth-chapter::before{
+  content:""; width:28px; height:1px; background:var(--amber);
 }
+.auth-quote{
+  font-family:var(--serif); font-style:italic; font-weight:400;
+  font-size:clamp(30px, 3.2vw, 46px); line-height:1.2; letter-spacing:-0.015em;
+  color:var(--navy);
+  margin:0; text-wrap:balance;
+}
+.auth-quote em{color:var(--amber-deep); font-weight:500;}
+.auth-attribution{
+  font-family:var(--mono); font-size:12px; letter-spacing:0.06em;
+  color:var(--ink-soft);
+}
+.auth-side-foot{height:1px;}
 
 /* Plan picker (signup) */
 .plan-pick{display:flex; flex-direction:column; gap:8px;}

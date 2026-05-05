@@ -65,7 +65,6 @@ function Hero({ onOpenDemo, variant }) {
     <section className={"hero" + (variant === "quiet" ? " hero-variant-quiet" : "")} id="top">
       <div className="wrap hero-grid">
         <div>
-          <span className="eyebrow">Digital SAT · Reading & Writing</span>
           <h1 className="mt-2">
             You don't do English the English way — you do it the <em>math</em> way.
           </h1>
@@ -91,8 +90,7 @@ function Problem() {
     <section className="bg-bone">
       <div className="wrap split-2">
         <div>
-          <span className="eyebrow">The problem</span>
-          <h2 className="mt-2">Math feels solvable. Verbal feels like a guessing game.</h2>
+          <h2>Math feels solvable. Verbal feels like a guessing game.</h2>
         </div>
         <p className="lead">
           Students from every background grasp math with relative ease, but consistently struggle with the verbal section.
@@ -109,7 +107,6 @@ function Method() {
     <section id="method">
       <div className="wrap">
         <div className="section-head">
-          <span className="eyebrow">The method</span>
           <h2>A clean, structured method.<br/>Apply, don't guess.</h2>
           <p className="body-text" style={{maxWidth:"60ch"}}>
             Our framework gives you a clear approach you can use across any passage,
@@ -147,7 +144,6 @@ function Demo({ onOpenDemo }) {
     <section className="bg-bone">
       <div className="wrap" style={{maxWidth:"960px"}}>
         <div className="section-head center">
-          <span className="eyebrow">See it in action</span>
           <h2>Watch the method solve a real passage.</h2>
         </div>
         <div className="demo-card" onClick={onOpenDemo} role="button" tabIndex={0} onKeyDown={(e)=>e.key==="Enter"&&onOpenDemo()}>
@@ -188,8 +184,7 @@ function Instructor() {
           </div>
         </div>
         <div>
-          <span className="eyebrow">Meet your instructor</span>
-          <h2 className="mt-2" style={{marginBottom:32}}>Decades of teaching, distilled into one method.</h2>
+          <h2 style={{marginBottom:32}}>Decades of teaching, distilled into one method.</h2>
           <div className="bio">
             <p>Over my decades of teaching and tutoring, one pattern has been impossible to ignore: students from every background grasp math with relative ease, but consistently struggle with the verbal section.</p>
             <p>It's not a lack of intelligence. It's the nature of the passages: dense texts, closely written ideas, and answer choices designed to feel almost identical. Even the sharpest minds can get tripped up.</p>
@@ -213,7 +208,6 @@ function Topics() {
       <div className="wrap">
         <div className="topics-cta">
           <div className="topics-cta__copy">
-            <span className="eyebrow">The curriculum</span>
             <h2 className="topics-cta__h">8 skills. One method. <em>Built for each one.</em></h2>
             <p className="body-text topics-cta__p">
               Every Digital SAT Reading &amp; Writing question type, mapped to a repeatable framework.
@@ -251,7 +245,6 @@ function Testimonials() {
     <section>
       <div className="wrap">
         <div className="section-head">
-          <span className="eyebrow">Results</span>
           <h2>Students who stopped guessing — and started scoring.</h2>
         </div>
         <div className="tcard-grid">
@@ -300,7 +293,6 @@ function Pricing() {
     <section className="bg-bone" id="pricing">
       <div className="wrap">
         <div className="section-head center">
-          <span className="eyebrow">Pricing</span>
           <h2>Choose your level of access.</h2>
           <p className="body-text">Cancel anytime. No hidden fees.</p>
         </div>
@@ -370,7 +362,6 @@ function FAQ() {
     <section id="faq">
       <div className="wrap">
         <div className="section-head center">
-          <span className="eyebrow">Questions & answers</span>
           <h2>Common questions.</h2>
         </div>
         <div className="faq">
@@ -393,8 +384,7 @@ function FinalCTA() {
   return (
     <section className="bg-amber final-cta">
       <div className="wrap">
-        <span className="eyebrow" style={{color:"rgba(26,18,5,0.55)"}}>Ready to begin</span>
-        <h2 className="mt-2">Ready to do English the math way?</h2>
+        <h2>Ready to do English the math way?</h2>
         <p>Start free. Upgrade when you're ready.</p>
         <a href="#pricing" className="btn btn-lg" style={{background:"#152647", color:"#fff", borderColor:"#152647"}}>
           Start free <span className="btn-arrow">→</span>
@@ -472,36 +462,48 @@ function VideoModal({ open, onClose, url }) {
 
 function Walkthroughs() {
   const videos = [
-    { id: "z3ZQ-9Cn8TE", kicker: "Walkthrough · 01", title: "Apply the formula, eliminate cleanly", desc: "Shipra walks through a Reading question end-to-end using the method." },
-    { id: "z3FHqo26uL0", kicker: "Walkthrough · 02", title: "Predict, then match — every time", desc: "A second question type, solved with the same repeatable framework." },
+    { id: "", kicker: "Walkthrough · 01", title: "Apply the formula, eliminate cleanly", desc: "Shipra walks through a Reading question end-to-end using the method." },
+    { id: "", kicker: "Walkthrough · 02", title: "Predict, then match — every time", desc: "A second question type, solved with the same repeatable framework." },
   ];
   return (
     <section id="walkthroughs">
       <div className="wrap">
         <div className="section-head">
-          <span className="eyebrow">Solution walkthroughs</span>
           <h2>Watch the method, applied.</h2>
           <p className="body-text" style={{maxWidth:"60ch"}}>
             Two real SAT R&W questions, solved on camera using the framework — narrated by Shipra.
           </p>
         </div>
         <div className="walkthroughs">
-          {videos.map(v => (
-            <a key={v.id} className="walk-card" href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer">
-              <div className="walk-vid">
-                <img src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`} alt={v.title} loading="lazy" />
-                <div className="walk-play"><PlayIcon size={32} /></div>
-                <div className="walk-yt">
-                  <svg width="14" height="10" viewBox="0 0 28 20" fill="none"><path d="M27.4 3.1c-.3-1.2-1.3-2.2-2.5-2.5C22.6 0 14 0 14 0S5.4 0 3.1.6C1.9.9.9 1.9.6 3.1 0 5.4 0 10 0 10s0 4.6.6 6.9c.3 1.2 1.3 2.2 2.5 2.5C5.4 20 14 20 14 20s8.6 0 10.9-.6c1.2-.3 2.2-1.3 2.5-2.5C28 14.6 28 10 28 10s0-4.6-.6-6.9z" fill="#FF0000"/><path d="M11.2 14.3l7.2-4.3-7.2-4.3v8.6z" fill="#fff"/></svg>
-                  <span>YouTube</span>
+          {videos.map((v, i) => (
+            v.id ? (
+              <a key={i} className="walk-card" href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer">
+                <div className="walk-vid">
+                  <img src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`} alt={v.title} loading="lazy" />
+                  <div className="walk-play"><PlayIcon size={32} /></div>
+                  <div className="walk-yt">
+                    <svg width="14" height="10" viewBox="0 0 28 20" fill="none"><path d="M27.4 3.1c-.3-1.2-1.3-2.2-2.5-2.5C22.6 0 14 0 14 0S5.4 0 3.1.6C1.9.9.9 1.9.6 3.1 0 5.4 0 10 0 10s0 4.6.6 6.9c.3 1.2 1.3 2.2 2.5 2.5C5.4 20 14 20 14 20s8.6 0 10.9-.6c1.2-.3 2.2-1.3 2.5-2.5C28 14.6 28 10 28 10s0-4.6-.6-6.9z" fill="#FF0000"/><path d="M11.2 14.3l7.2-4.3-7.2-4.3v8.6z" fill="#fff"/></svg>
+                    <span>YouTube</span>
+                  </div>
+                </div>
+                <div className="walk-meta">
+                  <span className="kicker">{v.kicker}</span>
+                  <h3>{v.title}</h3>
+                  <p>{v.desc}</p>
+                </div>
+              </a>
+            ) : (
+              <div key={i} className="walk-card walk-card--placeholder">
+                <div className="walk-vid">
+                  <div className="walk-placeholder">Video coming soon</div>
+                </div>
+                <div className="walk-meta">
+                  <span className="kicker">{v.kicker}</span>
+                  <h3>{v.title}</h3>
+                  <p>{v.desc}</p>
                 </div>
               </div>
-              <div className="walk-meta">
-                <span className="kicker">{v.kicker}</span>
-                <h3>{v.title}</h3>
-                <p>{v.desc}</p>
-              </div>
-            </a>
+            )
           ))}
         </div>
       </div>

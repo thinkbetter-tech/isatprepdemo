@@ -51,7 +51,6 @@ function TopicsHero() {
       <div className="wrap">
         <a href="index.html" style={{fontFamily:"var(--mono)", fontSize:12, color:"var(--ink-soft)", letterSpacing:"0.06em", textTransform:"uppercase"}}>← Home</a>
         <div style={{marginTop:18}}>
-          <span className="eyebrow">The curriculum</span>
           <h1 style={{fontSize:"clamp(40px, 5vw, 64px)", marginTop:14, lineHeight:1.04, maxWidth:"18ch"}}>
             The 8 skills that define SAT Reading &amp; Writing.
           </h1>
@@ -127,12 +126,6 @@ function TopicsGrid() {
             </div>
           </div>
         </a>
-
-        <div className="topics-divider">
-          <span className="topics-divider__line" />
-          <span className="topics-divider__label">Topics 02 – 08 · unlock with a plan</span>
-          <span className="topics-divider__line" />
-        </div>
 
         <div className="topic-grid">
           {rest.map(t => <TopicCard key={t.n} t={t} />)}

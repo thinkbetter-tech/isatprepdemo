@@ -26,29 +26,23 @@ function AuthSide({ mode }) {
         <a href="index.html" className="home-link">← Back to home</a>
       </div>
 
-      <svg className="auth-side-diagram" viewBox="0 0 480 480" aria-hidden="true">
-        <path d="M70 90 Q 50 90 50 110 V 370 Q 50 390 70 390" stroke="#fff" strokeWidth="1.5" fill="none"/>
-        <path d="M410 90 Q 430 90 430 110 V 370 Q 430 390 410 390" stroke="#fff" strokeWidth="1.5" fill="none"/>
-        <line x1="80" y1="220" x2="400" y2="220" stroke="#fff" strokeWidth="1"/>
-        <line x1="80" y1="226" x2="400" y2="226" stroke="#fff" strokeWidth="1"/>
-        <text x="240" y="180" textAnchor="middle" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="64" fill="#F59E0B">f(x)</text>
-        <text x="240" y="290" textAnchor="middle" fontFamily="JetBrains Mono, monospace" fontSize="14" fill="#fff" letterSpacing="6">METHOD</text>
-      </svg>
-
-      <div className="auth-quote-block">
-        <span className="eyebrow">{mode === "signup" ? "Welcome aboard" : "Welcome back"}</span>
-        <h2>
+      <div className="auth-editorial">
+        <span className="auth-chapter">{mode === "signup" ? "Begin" : "Welcome back"}</span>
+        <p className="auth-quote">
           {mode === "signup"
             ? <>You don't do English the English way — you do it the <em>math</em> way.</>
-            : <>The method is waiting. Pick up where you <em>left off</em>.</>
+            : <>The method is <em>waiting</em>.</>
           }
-        </h2>
-        <div className="meta">
-          <div><strong>+100 pts</strong>Avg. R&W gain</div>
-          <div><strong>8</strong>Skill modules</div>
-          <div><strong>Self-paced</strong>Cancel anytime</div>
-        </div>
+        </p>
+        <span className="auth-attribution">
+          {mode === "signup"
+            ? "— Shipra Batra, founder & lead instructor"
+            : "Pick up where you left off."
+          }
+        </span>
       </div>
+
+      <div className="auth-side-foot" aria-hidden="true" />
     </aside>
   );
 }
