@@ -325,7 +325,7 @@ function Pricing() {
               { text: "Choose any 4 modules of your choice" },
               { text: "100 practice questions per selected module" },
               { text: "Optimised learning approach per selected module" },
-              { text: "6-month access" },
+              { text: "Lifetime access" },
             ]}
           />
           <PriceCard
@@ -340,7 +340,7 @@ function Pricing() {
               { text: "Access to all 8 modules" },
               { text: "Entire question bank and learning approaches unlocked" },
               { text: "2 Practice Tests unlocked"},
-              { text: "12-month access" },
+              { text: "Lifetime access" },
             ]}
           />
         </div>
