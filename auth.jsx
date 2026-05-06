@@ -158,11 +158,12 @@ function SignupForm() {
     }, 800);
   };
 
-  const PLANS = [
-    {id:"free",     name:"Free",     desc:"Sample of Words in Context",  price:"$0",  per:""},
-    {id:"core",     name:"Core",     desc:"All 6 Reading topics",         price:"$59", per:"/mo"},
-    {id:"complete", name:"Complete", desc:"All 8 topics + practice tests", price:"$99", per:"/mo"},
-  ];
+  const PLAN_DETAILS = {
+    free:     { name: "Free",     price: "$0",  note: "lifetime access" },
+    core:     { name: "Core",     price: "$59", note: "one-time · lifetime access" },
+    complete: { name: "Complete", price: "$79", note: "one-time · lifetime access" },
+  };
+  const planInfo = PLAN_DETAILS[plan] || PLAN_DETAILS.free;
 
   return (
     <div className="auth-form-side" data-screen-label="Signup">
@@ -175,7 +176,7 @@ function SignupForm() {
 
       <div className="auth-form-wrap">
         <h1 className="serif">Create your account.</h1>
-        <p className="lede">Free to start. Cancel anytime. No credit card for the free plan.</p>
+        <p className="lede">Free to start. No credit card for the free plan.</p>
 
         <form className="auth-form" onSubmit={submit} noValidate>
           <button type="button" className="btn-google" onClick={() => alert("Google sign-up (demo)")}>
@@ -204,20 +205,15 @@ function SignupForm() {
           </div>
 
           <div className="field">
-            <label>Choose a plan</label>
-            <div className="plan-pick">
-              {PLANS.map(p => (
-                <label key={p.id} className={"plan-opt" + (plan === p.id ? " sel" : "")}>
-                  <input type="radio" name="plan" value={p.id} checked={plan === p.id} onChange={() => setPlan(p.id)} />
-                  <div>
-                    <div className="pname">{p.name}</div>
-                    <div className="pdesc">{p.desc}</div>
-                  </div>
-                  <div className="pprice"><b>{p.price}</b>{p.per}</div>
-                </label>
-              ))}
+            <label>Selected plan</label>
+            <div className="plan-summary">
+              <div>
+                <div className="psum-name">{planInfo.name}</div>
+                <div className="psum-note">{planInfo.note}</div>
+              </div>
+              <div className="psum-price">{planInfo.price}</div>
+              <a href="index.html#pricing" className="psum-change">Change</a>
             </div>
-            <div className="hint">You can change or cancel any time.</div>
           </div>
 
           {err && <div className="error" style={{fontSize:13, color:"#B91C1C"}}>{err}</div>}

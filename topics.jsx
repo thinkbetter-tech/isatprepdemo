@@ -1,25 +1,27 @@
 // Dedicated Topics page — the full 8-skill curriculum.
 // Text Structure & Purpose is moved to position 01 (the only currently free + practiceable topic).
 
+// `available: true` = module has a wired-up free-sample practice page.
+// All modules ship with the same 4-free-question promise per the pricing — once
+// each practice page lands, set `available: true` and add an `href`.
 const TOPICS_FULL = [
-  // 01 — Free + practiceable. Surfaced first per Ravish's note.
+  // 01 — Available + practiceable. Surfaced first per Ravish's note.
   {
     n: 1, originalN: 2,
     name: "Text Structure & Purpose",
     desc: "Understand how passages are built — claim, evidence, qualifier, transition.",
     long: "The structural backbone of every Reading passage. Learn to read for the move, not the meaning — and the answer falls out.",
-    tier: "free",
     href: "practice.html",
     available: true,
     questions: 100,
   },
-  { n: 2, originalN: 1, name: "Words in Context",            desc: "Decode vocabulary in any passage.",              long: "A repeatable substitution method that beats memorizing 5,000 flashcards.", tier: "59" },
-  { n: 3, originalN: 3, name: "Cross-Text Connections",      desc: "Compare and link multiple texts.",               long: "Two passages, one question. Learn to map their relationship in seconds.",   tier: "59" },
-  { n: 4, originalN: 4, name: "Central Ideas & Details",     desc: "Find the main point, fast.",                     long: "Train your eye to spot the thesis sentence — and ignore the noise.",        tier: "59" },
-  { n: 5, originalN: 5, name: "Inferences",                  desc: "Read between the lines with precision.",         long: "An inference is a forced conclusion, not a guess. We show you the rules.",  tier: "59" },
-  { n: 6, originalN: 6, name: "Command of Evidence",         desc: "Pick the right proof every time.",               long: "Quantitative and textual evidence questions, demystified.",                  tier: "59" },
-  { n: 7, originalN: 7, name: "Boundaries (Grammar)",        desc: "Master punctuation and sentence structure.",     long: "Comma, semicolon, colon, dash. Rules — not vibes.",                          tier: "99" },
-  { n: 8, originalN: 8, name: "Rhetorical Synthesis & Transitions", desc: "Connect ideas seamlessly.",              long: "The two highest-leverage Writing question types, solved methodically.",     tier: "99" },
+  { n: 2, originalN: 1, name: "Words in Context",            desc: "Decode vocabulary in any passage.",              long: "A repeatable substitution method that beats memorizing 5,000 flashcards." },
+  { n: 3, originalN: 3, name: "Cross-Text Connections",      desc: "Compare and link multiple texts.",               long: "Two passages, one question. Learn to map their relationship in seconds." },
+  { n: 4, originalN: 4, name: "Central Ideas & Details",     desc: "Find the main point, fast.",                     long: "Train your eye to spot the thesis sentence — and ignore the noise." },
+  { n: 5, originalN: 5, name: "Inferences",                  desc: "Read between the lines with precision.",         long: "An inference is a forced conclusion, not a guess. We show you the rules." },
+  { n: 6, originalN: 6, name: "Command of Evidence",         desc: "Pick the right proof every time.",               long: "Quantitative and textual evidence questions, demystified." },
+  { n: 7, originalN: 7, name: "Boundaries (Grammar)",        desc: "Master punctuation and sentence structure.",     long: "Comma, semicolon, colon, dash. Rules — not vibes." },
+  { n: 8, originalN: 8, name: "Rhetorical Synthesis & Transitions", desc: "Connect ideas seamlessly.",              long: "The two highest-leverage Writing question types, solved methodically." },
 ];
 
 function TopicsNav() {
@@ -55,8 +57,8 @@ function TopicsHero() {
             The 8 skills that define SAT Reading &amp; Writing.
           </h1>
           <p className="body-text" style={{marginTop:18, maxWidth:"60ch"}}>
-            One method, eight applications. Start with the free sample topic — Text Structure &amp; Purpose —
-            then unlock the rest as you go.
+            One method, eight applications. Four free questions in every module — sample the method below,
+            then unlock the modules you want.
           </p>
         </div>
       </div>
@@ -66,7 +68,7 @@ function TopicsHero() {
 
 function TopicCard({ t }) {
   const external = !!t.href;
-  const href = t.href || "index.html#pricing";
+  const href = t.href || "signup.html?plan=core";
   return (
     <a
       href={href}
@@ -76,7 +78,7 @@ function TopicCard({ t }) {
     >
       <div className="topic-card__head">
         <span className="topic-card__num">{String(t.n).padStart(2,"0")}</span>
-        <TierBadge tier={t.tier} />
+        <TierBadge available={t.available} />
       </div>
       <h3 className="topic-card__name">{t.name}</h3>
       <p className="topic-card__desc">{t.desc}</p>
@@ -105,7 +107,7 @@ function TopicsGrid() {
           <div className="topic-feature__left">
             <div className="topic-feature__head">
               <span className="topic-feature__num">{String(first.n).padStart(2,"0")}</span>
-              <TierBadge tier={first.tier} />
+              <TierBadge available={first.available} />
               <span className="topic-feature__tag">Start here</span>
             </div>
             <h2 className="topic-feature__name">{first.name}</h2>
@@ -114,7 +116,7 @@ function TopicsGrid() {
               <span className="btn btn-primary">
                 Practice 4 free questions <span className="btn-arrow">→</span>
               </span>
-              <span className="topic-feature__meta">{first.questions} total questions · 4 unlocked</span>
+              <span className="topic-feature__meta">{first.questions} questions in this module</span>
             </div>
           </div>
           <div className="topic-feature__right" aria-hidden="true">
@@ -136,6 +138,17 @@ function TopicsGrid() {
 }
 
 function TopicsApp() {
+  // Cross-page #anchor scroll: re-trigger after React mounts, since the target
+  // section doesn't exist when the browser does its native scroll-to-hash.
+  React.useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash || hash === '#') return;
+    requestAnimationFrame(() => {
+      const el = document.querySelector(hash);
+      if (el) el.scrollIntoView({ behavior: 'instant', block: 'start' });
+    });
+  }, []);
+
   return (
     <div data-screen-label="Topics · Curriculum index">
       <TopicsNav />

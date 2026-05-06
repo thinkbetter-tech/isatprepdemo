@@ -6,34 +6,34 @@ const TESTIMONIALS = [
   { name: "Jackson M.", gain: "+110 in R&W", quote: "The 'math way' framing actually clicked for me. It's the only SAT prep that didn't feel like memorizing tricks." },
   { name: "Olivia R.", gain: "+150 in R&W", quote: "I went from a 580 to a 730 in Reading & Writing. The structured approach is genuinely a game changer." },
   { name: "Aanya S.", gain: "+105 in R&W", quote: "Other courses dump content on you. This one teaches a real method you actually use on test day." },
-  { name: "Sophia L.", gain: "+125 in R&W", quote: "The Words in Context lessons alone were worth the subscription. I stopped second-guessing myself." },
+  { name: "Sophia L.", gain: "+125 in R&W", quote: "The Words in Context lessons alone were worth every penny. I stopped second-guessing myself." },
   { name: "Noah K.", gain: "+115 in R&W", quote: "Cleanest, clearest SAT prep I've taken. Every lesson builds on the last." },
 ];
 
+// `available: true` = module has a working free-sample practice page wired up.
+// Currently only Topic 01. Other modules ship with the same 4-free-question promise
+// once their practice pages land — until then they route to signup on click.
 const TOPICS = [
-  { n: 1, name: "Text Structure & Purpose", desc: "Understand how passages are built", tier: "free", href: "practice.html" },
-  { n: 2, name: "Words in Context", desc: "Decode vocabulary in any passage", tier: "59" },
-  { n: 3, name: "Cross-Text Connections", desc: "Compare and link multiple texts", tier: "59" },
-  { n: 4, name: "Central Ideas & Details", desc: "Find the main point, fast", tier: "59" },
-  { n: 5, name: "Inferences", desc: "Read between the lines with precision", tier: "59" },
-  { n: 6, name: "Command of Evidence", desc: "Pick the right proof every time", tier: "59" },
-  { n: 7, name: "Boundaries (Grammar)", desc: "Master punctuation and sentence structure", tier: "99" },
-  { n: 8, name: "Rhetorical Synthesis & Transitions", desc: "Connect ideas seamlessly", tier: "99" },
+  { n: 1, name: "Text Structure & Purpose", desc: "Understand how passages are built", available: true, href: "practice.html" },
+  { n: 2, name: "Words in Context", desc: "Decode vocabulary in any passage" },
+  { n: 3, name: "Cross-Text Connections", desc: "Compare and link multiple texts" },
+  { n: 4, name: "Central Ideas & Details", desc: "Find the main point, fast" },
+  { n: 5, name: "Inferences", desc: "Read between the lines with precision" },
+  { n: 6, name: "Command of Evidence", desc: "Pick the right proof every time" },
+  { n: 7, name: "Boundaries (Grammar)", desc: "Master punctuation and sentence structure" },
+  { n: 8, name: "Rhetorical Synthesis & Transitions", desc: "Connect ideas seamlessly" },
 ];
 
 const FAQS = [
-  { q: "Can I cancel anytime?", a: "Yes, cancel in one click from your account page. No questions, no fees." },
-  { q: "Is the free plan really free?", a: "Yes. No credit card required to start. Use it as long as you want." },
-  { q: "What if my score doesn't improve?", a: "Most students see meaningful gains within 2–4 weeks of consistent practice. If you're not improving, reach out and we'll work with you." },
-  { q: "How long does each lesson take?", a: "Most lessons are 15–25 minutes, plus practice. You can move at your own pace." },
-  { q: "Do you offer 1-on-1 tutoring?", a: "Currently the platform is self-paced. $99/month subscribers get priority Q&A access." },
-  { q: "What's the difference between $59 and $99?", a: "$59 covers the 6 Reading topics where most students need help. $99 adds the 2 Grammar/Writing topics, timed practice tests, and analytics." },
+  { q: "What does \"choose any 4 modules\" mean on the Core plan?", a: "After you purchase Core, you'll select any 4 of the 8 modules to fully unlock — 100 practice questions per selected module. Pick the ones that match where you need the most work." },
+  { q: "What if my score doesn't improve?", a: "Most students see meaningful gains within 2–4 weeks of consistent practice. If you're not improving, it only means more practice." },
+  { q: "How long does each lesson take?", a: "Each module is self-paced, so you can move through it at your own speed. As you practice and become familiar with the method, you’ll gain confidence and complete the modules more quickly." },
+  { q: "Why should I choose iSATPrep over others?", a: "iSATPrep isn’t a warehouse of AI-generated questions with generic explanations. Every question is carefully designed and reviewed by Shipra, a seasoned SAT tutor with over a decade of experience and a strong track record of results. This ensures that what you practice is thoughtful, effective, and truly aligned with how students improve." },
 ];
 
-function TierBadge({ tier }) {
-  if (tier === "free") return <span className="badge badge-free">● Free</span>;
-  if (tier === "59")   return <span className="badge badge-59">$59 plan</span>;
-  return <span className="badge badge-99">$99 plan</span>;
+function TierBadge({ available }) {
+  if (available) return <span className="badge badge-free">● Try 4 free</span>;
+  return <span className="badge">100 questions · 4 free</span>;
 }
 
 function Nav({ onOpenDemo }) {
@@ -211,25 +211,25 @@ function Topics() {
             <h2 className="topics-cta__h">8 skills. One method. <em>Built for each one.</em></h2>
             <p className="body-text topics-cta__p">
               Every Digital SAT Reading &amp; Writing question type, mapped to a repeatable framework.
-              Start with the free sample topic, or browse all 8.
+              Four free questions in every module — sample the method, then unlock the rest.
             </p>
             <div className="topics-cta__btns">
               <a href="topics.html" className="btn btn-primary btn-lg">
                 Browse all 8 topics <span className="btn-arrow">→</span>
               </a>
               <a href="practice.html" className="btn btn-ghost btn-lg">
-                Try a free topic
+                Try 4 free questions
               </a>
             </div>
           </div>
-          <div className="topics-cta__list" aria-hidden="true">
-            {TOPICS.map(t => (
-              <div className="topics-cta__row" key={t.n}>
-                <span className="topics-cta__num">{String(t.n).padStart(2,"0")}</span>
-                <span className="topics-cta__name">{t.name}</span>
-                <span className="topics-cta__badge"><TierBadge tier={t.tier} /></span>
-              </div>
-            ))}
+          <div className="method-card" aria-hidden="true">
+            <h3 className="method-card__title">Every passage. The <em>same</em> four moves.</h3>
+            <div className="method-card__diagram">
+              <div className="mdg-row mdg-row--1">Claim</div>
+              <div className="mdg-row mdg-row--2">Evidence</div>
+              <div className="mdg-row mdg-row--3">Qualifier</div>
+              <div className="mdg-row mdg-row--4">Transition</div>
+            </div>
           </div>
         </div>
       </div>
@@ -294,60 +294,53 @@ function Pricing() {
       <div className="wrap">
         <div className="section-head center">
           <h2>Choose your level of access.</h2>
-          <p className="body-text">Cancel anytime. No hidden fees.</p>
+          <p className="body-text">One-time payment. <em>Lifetime</em> access.</p>
         </div>
         <div className="price-grid">
           <PriceCard
             tier="Tier 01"
             name="Free"
             price="0"
-            per="forever"
-            tagline="Taste the method."
+            per="lifetime"
+            tagline={<>A <em>preview</em> of the method.</>}
             cta="Start free"
             planId="free"
             features={[
-              { text: "Topic 2: Text Structure & Purpose (sample access)" },
-              { text: "4 sample practice questions with full explanations" },
-              { text: "Method overview video" },
-              { text: "All other topics locked", no: true },
-              { text: "Full question bank locked", no: true },
-              { text: "Progress tracking", no: true },
+              { text: "4 sample questions in each module" },
+              { text: "Preview of the optimised learning approach for your selected module" },
+              { text: "One-month access" },
             ]}
           />
           <PriceCard
             tier="Tier 02"
             name="Core"
             price="59"
-            per="/ month"
-            tagline="Core mastery — everything you need for the Reading section."
-            cta="Start 7-day free trial"
+            per="one-time"
+            tagline={<>Pick <em>any </em> four modules to master.</>}
+            cta="Get Core"
             popular
             planId="core"
             features={[
-              { text: "Everything in Free" },
-              { text: "All Reading topics fully unlocked (Topics 1–6)" },
-              { text: "Full lesson library for 6 topics" },
-              { text: "Complete practice question bank for 6 topics" },
-              { text: "Progress tracking & dashboard" },
-              { text: "Writing/Grammar topics (Topics 7–8) locked", no: true },
-              { text: "Timed full-section practice", no: true },
+
+              { text: "Choose any 4 modules of your choice" },
+              { text: "100 practice questions per selected module" },
+              { text: "Optimised learning approach per selected module" },
+              { text: "6-month access" },
             ]}
           />
           <PriceCard
             tier="Tier 03"
             name="Complete"
-            price="99"
-            per="/ month"
-            tagline="The full prep experience for top scores."
-            cta="Get complete access"
+            price="79"
+            per="one-time"
+            tagline={<>The <em>full</em> method, every module.</>}
+            cta="Get Complete"
             planId="complete"
             features={[
-              { text: "Everything in Core" },
-              { text: "All 8 topics fully unlocked" },
-              { text: "Writing & Grammar lessons (Boundaries, Rhetorical Synthesis)" },
-              { text: "Timed full-section practice tests" },
-              { text: "Score-tracking analytics dashboard" },
-              { text: "Priority Q&A support" },
+              { text: "Access to all 8 modules" },
+              { text: "Entire question bank and learning approaches unlocked" },
+              { text: "2 Practice Tests unlocked"},
+              { text: "12-month access" },
             ]}
           />
         </div>
