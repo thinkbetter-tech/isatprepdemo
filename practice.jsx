@@ -338,9 +338,23 @@ function LockedRail() {
 }
 
 function PracticeApp() {
+  const params = new URLSearchParams(window.location.search);
+  const fromPreview = params.get("from") === "preview";
+  const previewPlan = ["free","core","complete"].includes(params.get("plan")) ? params.get("plan") : "core";
+  const previewN = parseInt(params.get("n"), 10);
+  const backN = previewN >= 1 && previewN <= 8 ? previewN : 1;
+
   return (
     <div data-screen-label="Practice · Text Structure & Purpose">
-      <PracticeNav />
+      {fromPreview && <DemoBanner plan={previewPlan} />}
+      {fromPreview ? <PreviewNav plan={previewPlan} /> : <PracticeNav />}
+      {fromPreview && (
+        <div className="wrap" style={{paddingTop:"1.25rem"}}>
+          <a href={`preview-module.html?plan=${previewPlan}&n=${backN}`} className="back-link">
+            &larr; Back to Module {String(backN).padStart(2,"0")}
+          </a>
+        </div>
+      )}
       <TopicHeader unlocked={4} total={100}/>
       <section style={{padding:"1rem 0 5rem"}}>
         <div className="wrap" style={{maxWidth:980}}>

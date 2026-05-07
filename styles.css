@@ -746,3 +746,284 @@ body.density-comfy{--pad-y: 9rem;}
 .topic-card:hover .topic-card__cta{color:var(--amber-deep); gap:10px;}
 
 .topic-card--free{border-color:var(--navy); background:#fff;}
+
+/* =========================================================
+   PREVIEW — static "what's inside" tour for prospects.
+   Mockup-only; no real auth/state. Pages: preview-dashboard,
+   preview-module, plus practice.html when ?from=preview.
+   ========================================================= */
+
+/* Demo banner — full-width strip across the top of every preview page. */
+.demo-banner{
+  background:var(--bg-2); border-bottom:1px solid var(--rule);
+}
+.demo-banner__inner{
+  display:flex; align-items:center; gap:18px;
+  padding:12px 32px; flex-wrap:wrap;
+}
+.demo-banner__label{
+  font-family:var(--mono); font-size:10px; letter-spacing:0.18em;
+  color:var(--amber-deep); background:#FFF8EC; border:1px solid #F5D9A0;
+  padding:4px 10px; border-radius:999px; text-transform:uppercase; flex-shrink:0;
+}
+.demo-banner__msg{
+  font-size:14px; color:var(--ink-soft); flex:1; min-width:0;
+}
+.demo-banner__msg em{
+  font-style:italic; font-family:var(--serif); color:var(--amber-deep); font-weight:500;
+}
+
+/* Preview nav variant — replaces login/signup buttons with user identity. */
+.preview-nav__user{
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--sans);
+}
+.preview-nav__name{
+  font-family:var(--serif); font-size:16px; color:var(--navy); font-weight:500;
+}
+.preview-nav__plan{
+  font-family:var(--mono); font-size:12px; color:var(--ink-soft); letter-spacing:0.06em;
+}
+
+/* Plan switcher — pill row centered below nav. */
+.plan-toggle-wrap{padding:18px 0 6px;}
+.plan-toggle{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.plan-toggle__lbl{
+  font-family:var(--mono); font-size:11px; color:var(--ink-soft);
+  letter-spacing:0.14em; text-transform:uppercase; margin-right:8px;
+}
+.plan-toggle__opt{
+  font-family:var(--sans); font-size:14px; color:var(--ink);
+  padding:7px 16px; border:1px solid var(--rule); border-radius:999px;
+  text-decoration:none; background:var(--bg);
+  transition:border-color .12s, color .12s, background .12s;
+}
+.plan-toggle__opt:hover{border-color:var(--navy);}
+.plan-toggle__opt.sel{
+  border-color:var(--navy); background:var(--navy); color:#fff;
+}
+
+/* Preview hero — short greeting at top of dashboard. */
+.preview-hero{padding:42px 0 12px;}
+.preview-hero__h{
+  font-family:var(--serif); font-size:clamp(34px, 4.5vw, 56px); line-height:1.05;
+  color:var(--navy); font-weight:500; letter-spacing:-0.015em; margin:0;
+}
+.preview-hero__h em{
+  font-style:italic; font-family:var(--serif); color:var(--amber-deep); font-weight:500;
+}
+.preview-hero__sub{
+  font-size:18px; color:var(--ink-soft); margin:14px 0 0; max-width:60ch;
+}
+
+/* Generic preview section spacing. */
+.preview-section{padding:34px 0;}
+.preview-section__h{
+  font-family:var(--serif); font-size:clamp(24px, 2.4vw, 32px); line-height:1.15;
+  color:var(--navy); font-weight:500; letter-spacing:-0.012em; margin:0 0 24px;
+}
+.preview-section__h em{
+  font-style:italic; font-family:var(--serif); color:var(--amber-deep); font-weight:500;
+}
+
+/* Continue card — pinned "resume where you left off" affordance. */
+.continue-card{
+  display:flex; align-items:center; justify-content:space-between; gap:32px;
+  padding:28px 32px; border:1px solid var(--rule); border-radius:14px;
+  background:var(--bg); flex-wrap:wrap;
+  box-shadow:0 1px 0 rgba(15,30,61,0.02), 0 24px 60px -38px rgba(15,30,61,0.18);
+}
+.continue-card__left{display:flex; flex-direction:column; gap:6px; min-width:0;}
+.continue-card__kicker{
+  font-size:11px; color:var(--ink-soft); letter-spacing:0.14em; text-transform:uppercase;
+}
+.continue-card__title{
+  font-family:var(--serif); font-size:24px; color:var(--navy); font-weight:500;
+  letter-spacing:-0.012em;
+}
+.continue-card__pos{
+  font-family:var(--mono); font-size:12px; color:var(--ink-soft); letter-spacing:0.06em;
+}
+
+/* Module picker — interactive chips for the "Choose any 4" demo. */
+.picker__head{margin-bottom:24px;}
+.picker__h{
+  font-family:var(--serif); font-size:clamp(26px, 2.6vw, 36px); line-height:1.1;
+  color:var(--navy); font-weight:500; letter-spacing:-0.012em; margin:0;
+}
+.picker__h em{
+  font-style:italic; font-family:var(--serif); color:var(--amber-deep); font-weight:500;
+}
+.picker__count{
+  font-family:var(--mono); font-size:13px; color:var(--ink-soft);
+  letter-spacing:0.04em; margin:10px 0 0;
+}
+.picker__count em{
+  font-style:normal; font-family:var(--serif); color:var(--amber-deep); font-weight:600;
+}
+.picker__count--ok{color:var(--navy);}
+.picker__count--over{color:#B91C1C;}
+.picker__grid{
+  display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;
+}
+@media (max-width: 900px){.picker__grid{grid-template-columns: repeat(2, 1fr);}}
+.picker__chip{
+  display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+  padding:14px 16px; border:1px solid var(--rule); border-radius:10px;
+  background:var(--bg); cursor:pointer; text-align:left;
+  transition:border-color .12s, background .12s, box-shadow .12s;
+  font-family:var(--sans);
+}
+.picker__chip:hover{border-color:var(--navy);}
+.picker__chip.sel{
+  border-color:var(--amber); background:#FFFCF4;
+  box-shadow:0 0 0 2px rgba(245,158,11,0.18);
+}
+.picker__chip-num{
+  font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:0.08em;
+}
+.picker__chip-name{
+  font-family:var(--serif); font-size:16px; color:var(--navy); font-weight:500;
+  line-height:1.18;
+}
+.picker__chip-state{
+  font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--ink-soft); margin-top:auto;
+}
+.picker__chip.sel .picker__chip-state{color:var(--amber-deep);}
+
+/* Module grid on dashboard. */
+.mgrid{
+  display:grid; grid-template-columns: repeat(4, 1fr); gap:14px;
+}
+@media (max-width: 1100px){.mgrid{grid-template-columns: repeat(2, 1fr);}}
+@media (max-width: 600px){.mgrid{grid-template-columns: 1fr;}}
+.mcard{
+  display:flex; flex-direction:column; gap:10px;
+  padding:22px 22px 20px; border:1px solid var(--rule); border-radius:12px;
+  background:var(--bg); text-decoration:none;
+  transition:border-color .12s, transform .12s, box-shadow .12s;
+}
+.mcard:hover{
+  border-color:var(--navy); transform:translateY(-2px);
+  box-shadow:0 1px 0 rgba(15,30,61,0.04), 0 18px 40px -28px rgba(15,30,61,0.35);
+}
+.mcard--locked{background:var(--bg-2); opacity:0.85;}
+.mcard--recent{border-color:var(--amber); box-shadow:0 0 0 2px rgba(245,158,11,0.15);}
+.mcard__head{display:flex; justify-content:space-between; align-items:center;}
+.mcard__num{font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:0.08em;}
+.mcard__pill{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.06em;
+  color:var(--ink-soft); padding:3px 8px;
+  border:1px solid var(--rule); border-radius:999px; background:var(--bg);
+}
+.mcard--locked .mcard__pill{color:var(--muted);}
+.mcard__name{
+  font-family:var(--serif); font-size:18px; color:var(--navy); font-weight:500;
+  letter-spacing:-0.005em; margin:4px 0 0;
+}
+.mcard__desc{
+  font-size:13px; color:var(--ink-soft); line-height:1.45; margin:0; flex:1;
+}
+.mcard__bar{
+  height:3px; background:var(--rule); border-radius:2px; overflow:hidden;
+}
+.mcard__bar-fill{
+  height:100%; background:var(--amber); transition:width .25s;
+}
+.mcard__cta{
+  font-family:var(--mono); font-size:11px; color:var(--navy);
+  letter-spacing:0.08em; text-transform:uppercase;
+  display:flex; align-items:center; gap:6px;
+}
+.mcard--locked .mcard__cta{color:var(--ink-soft);}
+
+/* Module detail hero. */
+.modhero{
+  display:flex; flex-direction:column; gap:14px;
+  padding:36px 0 8px;
+}
+.modhero__num{
+  font-size:11px; color:var(--ink-soft); letter-spacing:0.16em; text-transform:uppercase;
+}
+.modhero__h{
+  font-family:var(--serif); font-size:clamp(36px, 4.6vw, 56px); line-height:1.05;
+  color:var(--navy); font-weight:500; letter-spacing:-0.015em; margin:0;
+}
+.modhero__desc{
+  font-size:17px; color:var(--ink-soft); line-height:1.55; margin:0; max-width:60ch;
+}
+.modhero__bar{
+  height:6px; background:var(--rule); border-radius:3px; overflow:hidden;
+  margin-top:14px; max-width:540px;
+}
+.modhero__bar-fill{height:100%; background:var(--amber); transition:width .25s;}
+.modhero__progress{
+  font-family:var(--mono); font-size:13px; color:var(--ink-soft);
+  letter-spacing:0.04em; max-width:540px;
+}
+.modhero__progress em{
+  font-style:normal; font-family:var(--serif); color:var(--amber-deep); font-weight:600;
+}
+.modhero .btn{align-self:flex-start; margin-top:10px;}
+
+/* Question bank list (preview-module page only). */
+.qbank-list{
+  display:flex; flex-direction:column; gap:0;
+  background:var(--bg); border:1px solid var(--rule); border-radius:12px;
+  overflow:hidden;
+}
+.qbank-row{
+  display:grid; grid-template-columns: 64px 1fr 110px;
+  align-items:center; gap:18px;
+  padding:14px 22px; border-bottom:1px solid var(--rule);
+  text-decoration:none; transition:background .12s;
+}
+.qbank-row:last-child{border-bottom:none;}
+.qbank-row:hover{background:var(--bg-2);}
+.qbank-row__num{
+  font-family:var(--mono); font-size:12px; color:var(--ink-soft); letter-spacing:0.06em;
+}
+.qbank-row__preview{
+  font-family:var(--serif); font-size:15px; color:var(--navy); font-weight:500;
+}
+.qbank-row__status{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+  text-align:right; color:var(--ink-soft);
+}
+.qbank-row--done .qbank-row__status{color:#0F7A3D;}
+.qbank-row--current .qbank-row__status{color:var(--amber-deep);}
+.qbank-row--free .qbank-row__status{color:var(--amber-deep);}
+.qbank-row--locked{background:var(--bg-2);}
+.qbank-row--locked .qbank-row__preview{color:var(--ink-soft);}
+.qbank-row--locked .qbank-row__status{color:var(--muted);}
+.qbank-list__more{
+  text-align:center; font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+  letter-spacing:0.06em; margin:18px 0 0;
+}
+
+/* Back link (used on module page + practice page when from=preview). */
+.back-link{
+  display:inline-block; font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+  letter-spacing:0.06em; text-transform:uppercase; text-decoration:none;
+  padding-bottom:18px;
+}
+.back-link:hover{color:var(--amber-deep);}
+
+/* "See what you get" link inside Pricing cards. */
+.pcard__preview-link{
+  display:block; text-align:center;
+  font-family:var(--mono); font-size:11px; letter-spacing:0.1em;
+  color:var(--ink-soft); text-decoration:none; margin-top:-6px;
+}
+.pcard__preview-link:hover{color:var(--amber-deep);}
+
+@media (max-width: 720px){
+  .demo-banner__inner{padding:10px 24px; gap:12px;}
+  .demo-banner__msg{flex-basis:100%;}
+  .continue-card{padding:22px 24px;}
+  .qbank-row{grid-template-columns: 50px 1fr 80px; gap:12px; padding:12px 18px;}
+  .qbank-row__preview{font-size:14px;}
+}

@@ -264,7 +264,7 @@ function Testimonials() {
   );
 }
 
-function PriceCard({ tier, name, price, per, tagline, features, cta, popular, planId }) {
+function PriceCard({ tier, name, price, per, tagline, features, cta, popular, planId, showPreview }) {
   return (
     <div className={"pcard" + (popular ? " pop" : "")}>
       {popular && <div className="ribbon">★ Most popular</div>}
@@ -284,6 +284,11 @@ function PriceCard({ tier, name, price, per, tagline, features, cta, popular, pl
         ))}
       </ul>
       <a href={"signup.html?plan=" + (planId || "free")} className={"btn btn-block " + (popular ? "btn-primary" : "btn-outline")}>{cta}</a>
+      {showPreview && (
+        <a href={"preview-dashboard.html?plan=" + planId} className="pcard__preview-link">
+          See what you get →
+        </a>
+      )}
     </div>
   );
 }
@@ -320,6 +325,7 @@ function Pricing() {
             cta="Get Core"
             popular
             planId="core"
+            showPreview
             features={[
 
               { text: "Choose any 4 modules of your choice" },
@@ -336,6 +342,7 @@ function Pricing() {
             tagline={<>The <em>full</em> method, every module.</>}
             cta="Get Complete"
             planId="complete"
+            showPreview
             features={[
               { text: "Access to all 8 modules" },
               { text: "Entire question bank and learning approaches unlocked" },
@@ -417,7 +424,7 @@ function Footer() {
           <div>
             <h4>Contact</h4>
             <a href="mailto:hello@isatprep.net">hello@isatprep.net</a>
-            <a href="#">Twitter / X</a>
+            <a href="https://www.linkedin.com/in/shipra-batra-40aa99275/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
             <a href="#">Instagram</a>
           </div>
         </div>
