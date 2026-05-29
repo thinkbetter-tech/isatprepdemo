@@ -66,7 +66,7 @@ Examples:
 
 - "Apply the formula. Get results in seconds."
 - "Pick up where you left off."
-- "Master four modules. Then pick more."
+- "Master two modules. Then pick more."
 - "Watch the method, applied."
 - "Resume Question 24."
 - "4 free questions in each module."
@@ -91,7 +91,7 @@ Examples:
 | Wrong answer | "Oops! Try again 😢" | "Not quite. Here's why — and the method that gets it right." |
 | Right answer | "Awesome job!! 🎊" | "Correct. Here's how the method gets there." |
 | Resume CTA | "Continue learning →" | "Resume Question 24 →" |
-| Course completed | "Congratulations, you crushed it!" | "Module 03 done. 7 to go." |
+| Course completed | "Congratulations, you crushed it!" | "Module 03 done. 1 to go." |
 | Loading | "Loading awesome content..." | "Loading…" |
 | Error | "Something went wrong, please try again later" | "We couldn't load that. Refresh, or try again in a minute." |
 | Onboarding hello | "Welcome to your learning journey!" | "Welcome back, *Aanya*." |
@@ -285,7 +285,7 @@ A 28px navy-bordered rounded square with a lowercase `i` (or your product's init
 
 ```html
 <header class="section-head">
-  <h2>Master four modules. <em>Then</em> pick more.</h2>
+  <h2>Master two modules. <em>Then</em> pick more.</h2>
   <p class="body-text">Every module is 100 questions, structured by topic, with the method applied in every explanation.</p>
 </header>
 ```
@@ -383,7 +383,7 @@ These are the patterns to use for the actual learning surfaces. Build from these
 <section class="lms-hero">
   <div class="wrap">
     <h1 class="lms-hero__h">Welcome back, <em>Aanya</em>.</h1>
-    <p class="lms-hero__sub">Pick four modules. Master them. Then pick more.</p>
+    <p class="lms-hero__sub">Pick two modules. Master them. Then pick more.</p>
   </div>
 </section>
 ```

@@ -1,27 +1,23 @@
-// Dedicated Topics page — the full 8-skill curriculum.
-// Text Structure & Purpose is moved to position 01 (the only currently free + practiceable topic).
+// Dedicated Topics page — the full 4-skill curriculum.
+// Craft and Structure is position 01 (the only currently free + practiceable topic).
 
 // `available: true` = module has a wired-up free-sample practice page.
 // All modules ship with the same 4-free-question promise per the pricing — once
 // each practice page lands, set `available: true` and add an `href`.
 const TOPICS_FULL = [
-  // 01 — Available + practiceable. Surfaced first per Ravish's note.
+  // 01 — Available + practiceable. The free module.
   {
-    n: 1, originalN: 2,
-    name: "Text Structure & Purpose",
-    desc: "Understand how passages are built — claim, evidence, qualifier, transition.",
-    long: "The structural backbone of every Reading passage. Learn to read for the move, not the meaning — and the answer falls out.",
+    n: 1,
+    name: "Craft and Structure",
+    desc: "Vocabulary in context, text structure, and connections across passages.",
+    long: "How passages are built and how meaning moves through them. Read for the move, not just the meaning — and the answer falls out.",
     href: "practice.html",
     available: true,
     questions: 100,
   },
-  { n: 2, originalN: 1, name: "Words in Context",            desc: "Decode vocabulary in any passage.",              long: "A repeatable substitution method that beats memorizing 5,000 flashcards." },
-  { n: 3, originalN: 3, name: "Cross-Text Connections",      desc: "Compare and link multiple texts.",               long: "Two passages, one question. Learn to map their relationship in seconds." },
-  { n: 4, originalN: 4, name: "Central Ideas & Details",     desc: "Find the main point, fast.",                     long: "Train your eye to spot the thesis sentence — and ignore the noise." },
-  { n: 5, originalN: 5, name: "Inferences",                  desc: "Read between the lines with precision.",         long: "An inference is a forced conclusion, not a guess. We show you the rules." },
-  { n: 6, originalN: 6, name: "Command of Evidence",         desc: "Pick the right proof every time.",               long: "Quantitative and textual evidence questions, demystified." },
-  { n: 7, originalN: 7, name: "Boundaries (Grammar)",        desc: "Master punctuation and sentence structure.",     long: "Comma, semicolon, colon, dash. Rules — not vibes." },
-  { n: 8, originalN: 8, name: "Rhetorical Synthesis & Transitions", desc: "Connect ideas seamlessly.",              long: "The two highest-leverage Writing question types, solved methodically." },
+  { n: 2, name: "Information and Ideas",        desc: "Main ideas, details, inferences, and command of evidence.", long: "Find the thesis, hold the details, and pick the right proof — every time." },
+  { n: 3, name: "Expression of Ideas",          desc: "Rhetorical synthesis and transitions.",                     long: "Connect ideas with rhetorical control — the highest-leverage Writing moves, solved methodically." },
+  { n: 4, name: "Standard English Conventions", desc: "Punctuation, grammar, and sentence boundaries.",            long: "Comma, semicolon, colon, dash. Rules — not vibes." },
 ];
 
 function TopicsNav() {
@@ -54,10 +50,10 @@ function TopicsHero() {
         <a href="index.html" style={{fontFamily:"var(--mono)", fontSize:12, color:"var(--ink-soft)", letterSpacing:"0.06em", textTransform:"uppercase"}}>← Home</a>
         <div style={{marginTop:18}}>
           <h1 style={{fontSize:"clamp(40px, 5vw, 64px)", marginTop:14, lineHeight:1.04, maxWidth:"18ch"}}>
-            The 8 skills that define SAT Reading &amp; Writing.
+            The 4 skills that define SAT Reading &amp; Writing.
           </h1>
           <p className="body-text" style={{marginTop:18, maxWidth:"60ch"}}>
-            One method, eight applications. Four free questions in every module — sample the method below,
+            One method, four applications. Four free questions in every module — sample the method below,
             then unlock the modules you want.
           </p>
         </div>

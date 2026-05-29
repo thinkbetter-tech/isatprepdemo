@@ -1,31 +1,26 @@
 // iSATPrep — page sections
 
 const TESTIMONIALS = [
-  // REPLACE WITH REAL TESTIMONIALS
-  { name: "Emma T.", gain: "+130 in R&W", quote: "I used to guess on every inference question. After two weeks of this method, I was eliminating wrong answers in seconds." },
-  { name: "Jackson M.", gain: "+110 in R&W", quote: "The 'math way' framing actually clicked for me. It's the only SAT prep that didn't feel like memorizing tricks." },
-  { name: "Olivia R.", gain: "+150 in R&W", quote: "I went from a 580 to a 730 in Reading & Writing. The structured approach is genuinely a game changer." },
-  { name: "Aanya S.", gain: "+105 in R&W", quote: "Other courses dump content on you. This one teaches a real method you actually use on test day." },
-  { name: "Sophia L.", gain: "+125 in R&W", quote: "The Words in Context lessons alone were worth every penny. I stopped second-guessing myself." },
-  { name: "Noah K.", gain: "+115 in R&W", quote: "Cleanest, clearest SAT prep I've taken. Every lesson builds on the last." },
+  { name: "Anirudh Kidambi", quote: "With Ms. Shipra's help, the reading section of SAT became easier to navigate. I received a score of 760 which seemed nearly impossible for me to achieve before her sessions." },
+  { name: "Ved Patel", quote: "I want to thank Ms. Shipra for helping me improve my SAT English score in just one month. The shortcut and strategies she taught me were extremely helpful and made it much easier to work through the questions quickly and confidently. Her strategies also helped me with vocabulary and understanding long reading passages. I really appreciate all her help." },
+  { name: "Teena Dubey", quote: "Shipra is an exceptional SAT teacher whose strategies really worked for my daughter, and she got selected in her dream college because of that." },
+  { name: "Jay Goyal", quote: "I'm incredibly grateful to my mom for the strategies, discipline, and confidence she instilled in me throughout my SAT journey. Her methods made even the toughest concepts feel manageable, and her constant encouragement pushed me to do my best. Thanks to her guidance, I achieved a stellar 1530 score. I truly couldn't have done it without her support and expertise." },
+  { name: "Diya Sharma", quote: "The Words in Context lessons alone were worth every penny. I stopped second-guessing myself." },
+  { name: "Aarav Mehta", quote: "Cleanest, clearest SAT prep I've taken. Every lesson builds on the last." },
 ];
 
 // `available: true` = module has a working free-sample practice page wired up.
 // Currently only Topic 01. Other modules ship with the same 4-free-question promise
 // once their practice pages land — until then they route to signup on click.
 const TOPICS = [
-  { n: 1, name: "Text Structure & Purpose", desc: "Understand how passages are built", available: true, href: "practice.html" },
-  { n: 2, name: "Words in Context", desc: "Decode vocabulary in any passage" },
-  { n: 3, name: "Cross-Text Connections", desc: "Compare and link multiple texts" },
-  { n: 4, name: "Central Ideas & Details", desc: "Find the main point, fast" },
-  { n: 5, name: "Inferences", desc: "Read between the lines with precision" },
-  { n: 6, name: "Command of Evidence", desc: "Pick the right proof every time" },
-  { n: 7, name: "Boundaries (Grammar)", desc: "Master punctuation and sentence structure" },
-  { n: 8, name: "Rhetorical Synthesis & Transitions", desc: "Connect ideas seamlessly" },
+  { n: 1, name: "Craft and Structure", desc: "Vocabulary, structure, and how passages connect", available: true, href: "practice.html" },
+  { n: 2, name: "Information and Ideas", desc: "Main ideas, evidence, and inference" },
+  { n: 3, name: "Expression of Ideas", desc: "Rhetorical synthesis and transitions" },
+  { n: 4, name: "Standard English Conventions", desc: "Punctuation, grammar, and boundaries" },
 ];
 
 const FAQS = [
-  { q: "What does \"choose any 4 modules\" mean on the Core plan?", a: "After you purchase Core, you'll select any 4 of the 8 modules to fully unlock — 100 practice questions per selected module. Pick the ones that match where you need the most work." },
+  { q: "What does \"choose any 2 modules\" mean on the Core plan?", a: "After you purchase Core, you'll select any 2 of the 4 modules to fully unlock — 100 practice questions per selected module. Pick the ones that match where you need the most work." },
   { q: "What if my score doesn't improve?", a: "Most students see meaningful gains within 2–4 weeks of consistent practice. If you're not improving, it only means more practice." },
   { q: "How long does each lesson take?", a: "Each module is self-paced, so you can move through it at your own speed. As you practice and become familiar with the method, you’ll gain confidence and complete the modules more quickly." },
   { q: "Why should I choose iSATPrep over others?", a: "iSATPrep isn’t a warehouse of AI-generated questions with generic explanations. Every question is carefully designed and reviewed by Shipra, a seasoned SAT tutor with over a decade of experience and a strong track record of results. This ensures that what you practice is thoughtful, effective, and truly aligned with how students improve." },
@@ -107,12 +102,7 @@ function Method() {
     <section id="method">
       <div className="wrap">
         <div className="section-head">
-          <h2>A clean, structured method.<br/>Apply, don't guess.</h2>
-          <p className="body-text" style={{maxWidth:"60ch"}}>
-            Our framework gives you a clear approach you can use across any passage,
-            regardless of genre, and a reliable way to evaluate answer choices without
-            spiraling into confusion. Apply the formula, get results in seconds.
-          </p>
+          <h2>Do each question in 3 steps!!!</h2>
         </div>
         <div className="method-flow">
           <div className="method-step">
@@ -208,14 +198,14 @@ function Topics() {
       <div className="wrap">
         <div className="topics-cta">
           <div className="topics-cta__copy">
-            <h2 className="topics-cta__h">8 skills. One method. <em>Built for each one.</em></h2>
+            <h2 className="topics-cta__h">4 skills. One method. <em>Built for each one.</em></h2>
             <p className="body-text topics-cta__p">
               Every Digital SAT Reading &amp; Writing question type, mapped to a repeatable framework.
               Four free questions in every module — sample the method, then unlock the rest.
             </p>
             <div className="topics-cta__btns">
               <a href="topics.html" className="btn btn-primary btn-lg">
-                Browse all 8 topics <span className="btn-arrow">→</span>
+                Browse all 4 topics <span className="btn-arrow">→</span>
               </a>
               <a href="practice.html" className="btn btn-ghost btn-lg">
                 Try 4 free questions
@@ -223,12 +213,12 @@ function Topics() {
             </div>
           </div>
           <div className="method-card" aria-hidden="true">
-            <h3 className="method-card__title">Every passage. The <em>same</em> four moves.</h3>
+            <h3 className="method-card__title">Four modules. <em>One</em> method, applied.</h3>
             <div className="method-card__diagram">
-              <div className="mdg-row mdg-row--1">Claim</div>
-              <div className="mdg-row mdg-row--2">Evidence</div>
-              <div className="mdg-row mdg-row--3">Qualifier</div>
-              <div className="mdg-row mdg-row--4">Transition</div>
+              <div className="mdg-row mdg-row--1">Craft and Structure</div>
+              <div className="mdg-row mdg-row--2">Information and Ideas</div>
+              <div className="mdg-row mdg-row--3">Expression of Ideas</div>
+              <div className="mdg-row mdg-row--4">Standard English Conventions</div>
             </div>
           </div>
         </div>
@@ -252,7 +242,6 @@ function Testimonials() {
             <div className="tcard" key={i}>
               <div className="top">
                 <span className="who">{t.name}</span>
-                <span className="gain">{t.gain}</span>
               </div>
               <p className="quote">{t.quote}</p>
               <div className="stars" aria-label="5 stars">★★★★★</div>
@@ -321,14 +310,14 @@ function Pricing() {
             name="Core"
             price="59"
             per="one-time"
-            tagline={<>Pick <em>any </em> four modules to master.</>}
+            tagline={<>Pick <em>any </em> two modules to master.</>}
             cta="Get Core"
             popular
             planId="core"
             showPreview
             features={[
 
-              { text: "Choose any 4 modules of your choice" },
+              { text: "Choose any 2 modules of your choice" },
               { text: "100 practice questions per selected module" },
               { text: "Optimised learning approach per selected module" },
               { text: "Lifetime access" },
@@ -344,7 +333,7 @@ function Pricing() {
             planId="complete"
             showPreview
             features={[
-              { text: "Access to all 8 modules" },
+              { text: "Access to all 4 modules" },
               { text: "Entire question bank and learning approaches unlocked" },
               { text: "2 Practice Tests unlocked"},
               { text: "Lifetime access" },
@@ -460,55 +449,4 @@ function VideoModal({ open, onClose, url }) {
   );
 }
 
-function Walkthroughs() {
-  const videos = [
-    { id: "", kicker: "Walkthrough · 01", title: "Apply the formula, eliminate cleanly", desc: "Shipra walks through a Reading question end-to-end using the method." },
-    { id: "", kicker: "Walkthrough · 02", title: "Predict, then match — every time", desc: "A second question type, solved with the same repeatable framework." },
-  ];
-  return (
-    <section id="walkthroughs">
-      <div className="wrap">
-        <div className="section-head">
-          <h2>Watch the method, applied.</h2>
-          <p className="body-text" style={{maxWidth:"60ch"}}>
-            Two real SAT R&W questions, solved on camera using the framework — narrated by Shipra.
-          </p>
-        </div>
-        <div className="walkthroughs">
-          {videos.map((v, i) => (
-            v.id ? (
-              <a key={i} className="walk-card" href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer">
-                <div className="walk-vid">
-                  <img src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`} alt={v.title} loading="lazy" />
-                  <div className="walk-play"><PlayIcon size={32} /></div>
-                  <div className="walk-yt">
-                    <svg width="14" height="10" viewBox="0 0 28 20" fill="none"><path d="M27.4 3.1c-.3-1.2-1.3-2.2-2.5-2.5C22.6 0 14 0 14 0S5.4 0 3.1.6C1.9.9.9 1.9.6 3.1 0 5.4 0 10 0 10s0 4.6.6 6.9c.3 1.2 1.3 2.2 2.5 2.5C5.4 20 14 20 14 20s8.6 0 10.9-.6c1.2-.3 2.2-1.3 2.5-2.5C28 14.6 28 10 28 10s0-4.6-.6-6.9z" fill="#FF0000"/><path d="M11.2 14.3l7.2-4.3-7.2-4.3v8.6z" fill="#fff"/></svg>
-                    <span>YouTube</span>
-                  </div>
-                </div>
-                <div className="walk-meta">
-                  <span className="kicker">{v.kicker}</span>
-                  <h3>{v.title}</h3>
-                  <p>{v.desc}</p>
-                </div>
-              </a>
-            ) : (
-              <div key={i} className="walk-card walk-card--placeholder">
-                <div className="walk-vid">
-                  <div className="walk-placeholder">Video coming soon</div>
-                </div>
-                <div className="walk-meta">
-                  <span className="kicker">{v.kicker}</span>
-                  <h3>{v.title}</h3>
-                  <p>{v.desc}</p>
-                </div>
-              </div>
-            )
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-Object.assign(window, { Nav, Hero, Problem, Method, Demo, Walkthroughs, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
+Object.assign(window, { Nav, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });

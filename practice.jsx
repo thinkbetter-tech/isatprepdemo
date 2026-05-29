@@ -1,4 +1,4 @@
-// Practice page for "Text Structure & Purpose" — 4 unlocked questions + 96 locked.
+// Practice page for "Craft and Structure" — 4 unlocked questions + 96 locked.
 
 const QUESTIONS = [
   {
@@ -114,7 +114,7 @@ function TopicHeader({ unlocked, total }) {
         <a href="index.html#topics" style={{fontFamily:"var(--mono)", fontSize:12, color:"var(--ink-soft)", letterSpacing:"0.06em", textTransform:"uppercase"}}>← All topics</a>
         <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-end", gap:32, marginTop:18, flexWrap:"wrap"}}>
           <div style={{flex:"1 1 480px"}}>
-            <h1 style={{fontSize:"clamp(36px,4.4vw,56px)", lineHeight:1.05}}>Text Structure & Purpose</h1>
+            <h1 style={{fontSize:"clamp(36px,4.4vw,56px)", lineHeight:1.05}}>Craft and Structure</h1>
             <p className="body-text" style={{marginTop:14, maxWidth:"56ch"}}>
               Understand how passages are built — claim, evidence, qualifier, transition.
               Apply the method, predict the answer, eliminate the rest. {unlocked} questions are unlocked for free practice.
@@ -342,10 +342,10 @@ function PracticeApp() {
   const fromPreview = params.get("from") === "preview";
   const previewPlan = ["free","core","complete"].includes(params.get("plan")) ? params.get("plan") : "core";
   const previewN = parseInt(params.get("n"), 10);
-  const backN = previewN >= 1 && previewN <= 8 ? previewN : 1;
+  const backN = previewN >= 1 && previewN <= 4 ? previewN : 1;
 
   return (
-    <div data-screen-label="Practice · Text Structure & Purpose">
+    <div data-screen-label="Practice · Craft and Structure">
       {fromPreview && <DemoBanner plan={previewPlan} />}
       {fromPreview ? <PreviewNav plan={previewPlan} /> : <PracticeNav />}
       {fromPreview && (

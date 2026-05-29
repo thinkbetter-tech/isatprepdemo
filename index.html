@@ -79,11 +79,10 @@ function App() {
   return (
     <div data-screen-label="Marketing Home">
       <Nav />
-      <Hero onOpenDemo={() => { document.getElementById('walkthroughs')?.scrollIntoView({behavior:'smooth', block:'start'}); }} variant={t.heroVariant} />
+      <Hero onOpenDemo={() => { document.getElementById('method')?.scrollIntoView({behavior:'smooth', block:'start'}); }} variant={t.heroVariant} />
       <Problem />
       <Method />
-      <Demo onOpenDemo={() => { document.getElementById('walkthroughs')?.scrollIntoView({behavior:'smooth', block:'start'}); }} />
-      <Walkthroughs />
+      <Demo onOpenDemo={() => { document.getElementById('method')?.scrollIntoView({behavior:'smooth', block:'start'}); }} />
       <Instructor />
       <Topics />
       <Testimonials />

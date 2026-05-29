@@ -5,20 +5,20 @@
 const DEMO_USER = { firstName: "Aanya" };
 
 const PROGRESS_DATA = {
-  // 3 of 4 picked — invites the prospect to pick a 4th and feel the picker work.
+  // 1 of 2 picked — invites the prospect to pick the 2nd and feel the picker work.
   core: {
-    selectedModules: [1, 2, 5],
-    progress: { 1: 24, 2: 12, 5: 0 },
+    selectedModules: [1],
+    progress: { 1: 24 },
     lastSeen: { module: 1, question: 24 },
   },
   complete: {
-    selectedModules: [1, 2, 3, 4, 5, 6, 7, 8],
-    progress: { 1: 47, 2: 18, 3: 100, 4: 32, 5: 5, 6: 0, 7: 0, 8: 0 },
+    selectedModules: [1, 2, 3, 4],
+    progress: { 1: 47, 2: 18, 3: 100, 4: 32 },
     lastSeen: { module: 1, question: 47 },
   },
   free: {
     selectedModules: [],
-    progress: { 1: 2, 2: 1, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 },
+    progress: { 1: 2, 2: 1, 3: 0, 4: 0 },
     lastSeen: { module: 1, question: 2 },
   },
 };
@@ -48,7 +48,7 @@ function getQS(key, allowed, fallback) {
 function getPlan() { return getQS("plan", ["free","core","complete"], "core"); }
 function getModuleN() {
   const n = parseInt(new URLSearchParams(window.location.search).get("n"), 10);
-  return n >= 1 && n <= 8 ? n : 1;
+  return n >= 1 && n <= 4 ? n : 1;
 }
 
 function useHashScroll() {
@@ -158,7 +158,7 @@ function ContinueCard({ plan, lastSeen }) {
 }
 
 function ModulePicker({ selected, setSelected }) {
-  const max = 4;
+  const max = 2;
   const count = selected.length;
   const status = count < max ? "under" : (count > max ? "over" : "ok");
   const toggle = (n) => {
@@ -168,12 +168,12 @@ function ModulePicker({ selected, setSelected }) {
     <div className="picker">
       <div className="picker__head">
         <h2 className="picker__h">
-          Choose any <em>4</em> modules to master.
+          Choose any <em>2</em> modules to master.
         </h2>
         <p className={"picker__count picker__count--" + status}>
-          {status === "ok" && <>All four picked. Lock them in below.</>}
-          {status === "under" && <>You picked <em>{count}</em> of 4 &mdash; pick {max - count} more.</>}
-          {status === "over" && <>You picked <em>{count}</em> of 4 &mdash; drop {count - max}.</>}
+          {status === "ok" && <>Both picked. Lock them in below.</>}
+          {status === "under" && <>You picked <em>{count}</em> of 2 &mdash; pick {max - count} more.</>}
+          {status === "over" && <>You picked <em>{count}</em> of 2 &mdash; drop {count - max}.</>}
         </p>
       </div>
       <div className="picker__grid">
@@ -270,7 +270,7 @@ function DashboardApp() {
           </h1>
           <p className="preview-hero__sub">
             {plan === "free"     && <>Your free preview is below. Upgrade when you're ready.</>}
-            {plan === "core"     && <>Pick four modules. Master them. Then pick more.</>}
+            {plan === "core"     && <>Pick two modules. Master them. Then pick more.</>}
             {plan === "complete" && <>Every module is yours. Keep going.</>}
           </p>
         </div>
@@ -296,7 +296,7 @@ function DashboardApp() {
         <div className="wrap">
           <h2 className="preview-section__h">
             {plan === "core"     && <>Your modules</>}
-            {plan === "complete" && <>All eight modules</>}
+            {plan === "complete" && <>All four modules</>}
             {plan === "free"     && <>All modules &mdash; <em>4 free</em> questions in each</>}
           </h2>
           <ModuleGrid plan={plan} selected={selected} progress={effectiveProgress} lastSeen={lastSeen} />
