@@ -1,3 +1,6 @@
+import React from 'react';
+import { TOPICS_FULL } from './topics.jsx';
+import { Footer } from './sections.jsx';
 // preview.jsx — Static "what's inside" tour for prospects.
 // Pure mockup. No real auth, no progress storage, no backend.
 // All data is hardcoded; ?plan=core|complete|free switches the demo state.
@@ -420,3 +423,9 @@ Object.assign(window, {
   DemoBanner, PreviewNav, PlanToggle,
   ContinueCard, ModulePicker, ModuleGrid,
 });
+
+export {
+  DashboardApp, ModuleApp,
+  DemoBanner, PreviewNav, PlanToggle,
+  ContinueCard, ModulePicker, ModuleGrid,
+};

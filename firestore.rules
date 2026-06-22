@@ -1,0 +1,93 @@
+rules_version = '2';
+
+// iSATPrep Firestore security rules — STAGE 1
+//
+// Security model (see GO-LIVE-PLAN.md §5):
+//   - A signed-in user may read/write ONLY their own data.
+//   - Privileged fields (plan, entitlements) are SERVER-ONLY. They are set by
+//     Cloud Functions via the Admin SDK (which bypasses these rules). No client
+//     may create or change them — `plan` may only be created with the default
+//     value 'free'; `entitlements` may not be set from the client at all.
+//   - `videos/{id}` metadata is readable by any signed-in user, but never
+//     client-writable (populated server-side in Stage 2).
+//   - Everything else is denied by default (no catch-all allow).
+//
+// NOTE: Admin SDK writes (Cloud Functions) are NOT subject to these rules, so
+// the server can freely set plan/entitlements after a Stripe webhook (Stage 2).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Helpers -----------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // The set of fields the client is NEVER allowed to introduce or mutate.
+    // These are written exclusively by trusted server code (Admin SDK).
+    function noPrivilegedFields(data) {
+      return !data.keys().hasAny(['plan', 'entitlements', 'admin']);
+    }
+
+    // On create we allow a `plan` field ONLY if it is exactly the 'free'
+    // default. `entitlements` / `admin` may still never be set by the client.
+    function planIsFreeDefaultOnly(data) {
+      return (!('plan' in data) || data.plan == 'free')
+        && !data.keys().hasAny(['entitlements', 'admin']);
+    }
+
+    // ---- users/{uid} -------------------------------------------------------
+    // The user's own profile document. Created on first sign-up by the client
+    // with { name, email, plan: 'free', createdAt, ... }. plan/entitlements are
+    // thereafter server-only.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+
+      // Create: only your own doc, and only with plan defaulting to 'free'
+      // (or omitted). entitlements/admin may not be set by the client.
+      allow create: if isOwner(uid)
+        && planIsFreeDefaultOnly(request.resource.data);
+
+      // Update: only your own doc, and you may NOT add or change
+      // plan / entitlements / admin (those keep their server-set values).
+      // request.resource.data is the FULL post-write doc, so we compare the
+      // privileged fields against their existing values to ensure they are
+      // unchanged by this client write.
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data)
+             .affectedKeys()
+             .hasAny(['plan', 'entitlements', 'admin']) == false;
+
+      // No client deletes of the profile doc (use the Stage 2 deletion
+      // function, which runs as Admin SDK).
+      allow delete: if false;
+    }
+
+    // ---- progress/{uid}/** -------------------------------------------------
+    // A user's lesson progress / resume state. Fully owned by the user.
+    // e.g. progress/{uid}/lessons/{lessonId}
+    match /progress/{uid}/{document=**} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // ---- videos/{id} -------------------------------------------------------
+    // Video metadata (title, topic, requiredPlan, duration, status). Readable
+    // by any signed-in user so the catalog can render. NEVER client-writable —
+    // populated by admin tooling / functions in Stage 2. The playable URL is
+    // minted server-side and is NOT stored here in plaintext.
+    match /videos/{id} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ---- Default deny ------------------------------------------------------
+    // Any path not explicitly matched above is denied for all clients.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

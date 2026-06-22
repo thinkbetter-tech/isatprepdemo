@@ -1,4 +1,18 @@
+import React from 'react';
+import { Footer } from './sections.jsx';
+import { DemoBanner, PreviewNav } from './preview.jsx';
+import { trackEvent } from './firebase.js';
 // Practice page for "Craft and Structure" — 4 unlocked questions + 96 locked.
+
+// Module-scoped guard: fire `practice_start` ONCE per page session, the first
+// time a user begins a question (any card), not on every attempt/re-render.
+// trackEvent() is a safe no-op until analytics consent is granted.
+let practiceStartFired = false;
+function firePracticeStart() {
+  if (practiceStartFired) return;
+  practiceStartFired = true;
+  trackEvent('practice_start');
+}
 
 const QUESTIONS = [
   {
@@ -194,7 +208,7 @@ function QuestionCard({ q, idx }) {
           <p className="qcard-preview">
             {passageParas[0].slice(0, 180)}{passageParas[0].length > 180 ? "…" : ""}
           </p>
-          <button className="btn btn-primary btn-lg" onClick={() => setPhase("attempting")}>
+          <button className="btn btn-primary btn-lg" onClick={() => { firePracticeStart(); setPhase("attempting"); }}>
             Attempt question <span className="btn-arrow">→</span>
           </button>
         </div>
@@ -245,7 +259,12 @@ function QuestionCard({ q, idx }) {
             {phase === "attempting" && (
               <div className="qcard-actions">
                 <button className="btn btn-outline" onClick={() => { setPick(null); setPhase("idle"); }}>Cancel</button>
-                <button className="btn btn-primary" disabled={!pick} onClick={() => setPhase("submitted")}>
+                <button className="btn btn-primary" disabled={!pick} onClick={() => {
+                  // Funnel signal: an answer was submitted, with whether it was correct
+                  // and which question. No-op until analytics consent is granted.
+                  trackEvent('practice_answer_submit', { question_id: q.id, correct });
+                  setPhase("submitted");
+                }}>
                   Submit answer <span className="btn-arrow">→</span>
                 </button>
               </div>
@@ -370,3 +389,5 @@ function PracticeApp() {
 }
 
 Object.assign(window, { PracticeApp });
+
+export { PracticeApp };

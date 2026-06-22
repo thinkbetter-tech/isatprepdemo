@@ -1,3 +1,6 @@
+import React from 'react';
+import { ArrowRight } from './icons.jsx';
+import { TierBadge, Pricing, FinalCTA, Footer } from './sections.jsx';
 // Dedicated Topics page — the full 4-skill curriculum.
 // Craft and Structure is position 01 (the only currently free + practiceable topic).
 
@@ -157,4 +160,9 @@ function TopicsApp() {
   );
 }
 
-Object.assign(window, { TopicsApp });
+// TOPICS_FULL is consumed by preview.jsx. Under the old in-browser-Babel setup it
+// was an implicit shared-scope global; expose it on window AND export it so the
+// preview module can import it as a real ES dependency.
+Object.assign(window, { TopicsApp, TOPICS_FULL });
+
+export { TopicsApp, TOPICS_FULL };

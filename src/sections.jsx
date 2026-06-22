@@ -1,3 +1,5 @@
+import React from 'react';
+import { Check, NoCheck, ArrowRight, Plus, PlayIcon, GlyphRead, GlyphFormula, GlyphEliminate, HeroDiagram } from './icons.jsx';
 // iSATPrep — page sections
 
 const TESTIMONIALS = [
@@ -414,7 +416,8 @@ function Footer() {
             <h4>Contact</h4>
             <a href="mailto:hello@isatprep.net">hello@isatprep.net</a>
             <a href="https://www.linkedin.com/in/shipra-batra-40aa99275/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href="#">Instagram</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
           </div>
         </div>
         <div className="foot-bottom">
@@ -450,3 +453,5 @@ function VideoModal({ open, onClose, url }) {
 }
 
 Object.assign(window, { Nav, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
+
+export { Nav, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };

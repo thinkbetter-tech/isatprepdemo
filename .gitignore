@@ -2,3 +2,18 @@
 .idea/
 .claude/
 uploads/
+
+# Vite / Node
+node_modules/
+dist/
+
+# Env (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+
+# Firebase CLI deploy cache
+.firebase/
+
+# Separate project — never track here
+investment_agent/

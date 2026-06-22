@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// iSATPrep Cloud Storage security rules — STAGE 1
+//
+// Locked down by design. In Stage 1 there is NO client upload or download path
+// through Storage — the only real media (practice MP3s) ships as static assets
+// from Firebase Hosting, not from a Storage bucket.
+//
+// STAGE 2 (NOT enabled here):
+//   - Admin-only resumable upload of SOURCE video into a private bucket.
+//   - Students get NO direct read of source files. Playback is served via a
+//     short-lived, entitlement-checked SIGNED URL minted by a Cloud Function
+//     (or via the external video provider, Mux/Cloudflare). See GO-LIVE-PLAN.md
+//     §2.3 / §5 / Phase 2C.
+//   - public_access_prevention=enforced + uniform bucket-level access on the
+//     bucket itself (set in IaC / bootstrap, not in these rules).
+//
+// Until Stage 2 wiring lands, deny everything from the client.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Default deny: no client may read or write any object.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
