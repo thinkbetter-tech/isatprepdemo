@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, NoCheck, ArrowRight, Plus, PlayIcon, GlyphRead, GlyphFormula, GlyphEliminate, HeroDiagram } from './icons.jsx';
-import { onUserChanged, signOutUser, deleteAccount, isFirebaseConfigured } from './firebase.js';
+import { onUserChanged, signOutUser, deleteAccount, isFirebaseConfigured, getUserDoc } from './firebase.js';
 // iSATPrep — page sections
 
 const TESTIMONIALS = [
@@ -141,32 +141,44 @@ function AccountControl() {
   );
 }
 
-// Auth-aware nav CTA. Subscribes to auth state so every page reflects a
-// signed-in session (otherwise navigating between pages looks like a logout,
-// even though the session persists). Signed in → the AccountControl dropdown
-// (+ a "My practice" link); signed out → Log in / Start free.
-// `undefined` = still resolving (render a placeholder to avoid a Login→Account
-// flash); `null` = signed out; object = signed in.
-function NavCta() {
-  const [user, setUser] = React.useState(isFirebaseConfigured() ? undefined : null);
-
+// -----------------------------------------------------------------------------
+// Shared auth + plan state hook. ONE subscription point used by the whole nav so
+// every page reflects the same signed-in / paid state consistently.
+//   status: 'loading' | 'out' | 'in'
+//   paid:   boolean (plan core/complete). Only meaningful when status==='in'.
+// -----------------------------------------------------------------------------
+function useAuthPlan() {
+  const [state, setState] = React.useState(
+    isFirebaseConfigured() ? { status: 'loading', paid: false } : { status: 'out', paid: false }
+  );
   React.useEffect(() => {
     if (!isFirebaseConfigured()) return undefined;
-    const unsub = onUserChanged((u) => setUser(u || null));
+    const unsub = onUserChanged(async (u) => {
+      if (!u) { setState({ status: 'out', paid: false }); return; }
+      let paid = false;
+      try {
+        const doc = await getUserDoc();
+        const plan = (doc && doc.plan) || 'free';
+        paid = plan === 'core' || plan === 'complete';
+      } catch { /* default unpaid */ }
+      setState({ status: 'in', paid });
+    });
     return () => unsub();
   }, []);
+  return state;
+}
 
-  if (user === undefined) return <div className="nav-cta" aria-hidden="true" />;
-
-  if (user) {
+// Right-hand nav CTA. Signed in → account dropdown; signed out → Log in / Start
+// free. `loading` renders a placeholder to avoid a Login→Account flash.
+function NavCta({ auth }) {
+  if (auth.status === 'loading') return <div className="nav-cta" aria-hidden="true" />;
+  if (auth.status === 'in') {
     return (
       <div className="nav-cta">
-        <a href="practice.html" className="btn btn-ghost btn-sm">My practice</a>
         <AccountControl />
       </div>
     );
   }
-
   return (
     <div className="nav-cta">
       <a href="login.html" className="btn btn-ghost btn-sm">Log in</a>
@@ -175,27 +187,48 @@ function NavCta() {
   );
 }
 
-function Nav({ onOpenDemo }) {
+// THE canonical site nav, used on every page. Auth- and plan-aware.
+//   props: { onIndex?: boolean, current?: 'topics'|'tests'|'practice'|'account' }
+// - `onIndex` makes section links use bare #anchors (smooth scroll on the home
+//   page); off-index they use absolute index.html#anchor links.
+// - "Pricing" / upgrade affordances are HIDDEN for paid users (nothing to buy).
+// - Signed-in users get "My practice"; everyone gets Topics + Practice Test.
+function SiteNav({ onIndex = false, current } = {}) {
+  const auth = useAuthPlan();
+  const home = (anchor) => (onIndex ? `#${anchor}` : `index.html#${anchor}`);
+  const brandHref = onIndex ? '#top' : 'index.html';
+  const isPaid = auth.status === 'in' && auth.paid;
+  const isIn = auth.status === 'in';
+
   return (
     <nav className="nav">
       <SkipLink />
       <div className="wrap nav-inner">
-        <a href="#top" className="brand">
+        <a href={brandHref} className="brand">
           <span className="brand-mark">i</span>
           <span>iSATPrep</span>
         </a>
         <div className="nav-links">
-          <a href="#method">Method</a>
-          <a href="topics.html">Topics</a>
-          <a href="tests.html">Practice Test</a>
-          <a href="#instructor">About</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#faq">FAQ</a>
+          <a href={home('method')}>Method</a>
+          <a href="topics.html" aria-current={current === 'topics' ? 'page' : undefined}>Topics</a>
+          <a href="tests.html" aria-current={current === 'tests' ? 'page' : undefined}>Practice Test</a>
+          {isIn && (
+            <a href="practice.html" aria-current={current === 'practice' ? 'page' : undefined}>Practice</a>
+          )}
+          <a href={home('instructor')}>About</a>
+          {/* Pricing only matters to people who can still buy: signed-out or unpaid. */}
+          {!isPaid && <a href={home('pricing')}>Pricing</a>}
+          <a href={home('faq')}>FAQ</a>
         </div>
-        <NavCta />
+        <NavCta auth={auth} />
       </div>
     </nav>
   );
+}
+
+// Back-compat: the index page calls <Nav/>. It's the home page, so onIndex=true.
+function Nav({ onOpenDemo }) {
+  return <SiteNav onIndex={true} />;
 }
 
 function Hero({ onOpenDemo, variant }) {
@@ -598,6 +631,6 @@ function VideoModal({ open, onClose, url }) {
   );
 }
 
-Object.assign(window, { Nav, NavCta, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
+Object.assign(window, { Nav, NavCta, SiteNav, useAuthPlan, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
 
-export { Nav, NavCta, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };
+export { Nav, NavCta, SiteNav, useAuthPlan, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };

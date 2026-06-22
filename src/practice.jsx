@@ -1,5 +1,5 @@
 import React from 'react';
-import { Footer, AccountControl } from './sections.jsx';
+import { Footer, SiteNav } from './sections.jsx';
 import { DemoBanner, PreviewNav } from './preview.jsx';
 import {
   trackEvent, recordAnswer, getLessonProgress,
@@ -116,27 +116,7 @@ const QUESTIONS = [
 // ============================================================
 
 function PracticeNav() {
-  return (
-    <nav className="nav">
-      <div className="wrap nav-inner">
-        <a href="index.html" className="brand">
-          <span className="brand-mark">i</span>
-          <span>iSATPrep</span>
-        </a>
-        <div className="nav-links">
-          <a href="index.html#topics">Topics</a>
-          <a href="tests.html">Practice Test</a>
-          <a href="index.html#pricing">Pricing</a>
-          <a href="index.html#faq">FAQ</a>
-        </div>
-        <div className="nav-cta">
-          <AccountControl />
-          <a href="index.html" className="btn btn-ghost btn-sm">← Back to home</a>
-          <a href="index.html#pricing" className="btn btn-primary btn-sm">Upgrade</a>
-        </div>
-      </div>
-    </nav>
-  );
+  return <SiteNav current="practice" />;
 }
 
 function TopicHeader({ topicName, unlocked, total, paid }) {

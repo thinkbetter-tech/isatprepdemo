@@ -1,5 +1,5 @@
 import React from 'react';
-import { Footer, NavCta } from './sections.jsx';
+import { Footer, SiteNav } from './sections.jsx';
 import {
   onUserChanged, isFirebaseConfigured, currentUser, linkedProviders,
   getUserDoc, updateDisplayName, changePassword, sendReset,
@@ -33,25 +33,6 @@ function Status({ msg }) {
   return <p className={'acct-status ' + (msg.ok ? 'ok' : 'err')} role="status">{msg.text}</p>;
 }
 
-function AccountNav() {
-  return (
-    <nav className="nav">
-      <div className="wrap nav-inner">
-        <a href="index.html" className="brand">
-          <span className="brand-mark">i</span>
-          <span>iSATPrep</span>
-        </a>
-        <div className="nav-links">
-          <a href="index.html#method">Method</a>
-          <a href="topics.html">Topics</a>
-          <a href="practice.html">Practice</a>
-          <a href="tests.html">Practice Test</a>
-        </div>
-        <NavCta />
-      </div>
-    </nav>
-  );
-}
 
 function ProfileSection({ user, doc, onSaved }) {
   const [name, setName] = React.useState(user.displayName || (doc && doc.name) || '');
@@ -324,7 +305,7 @@ function AccountApp() {
 
   return (
     <div data-screen-label="Account">
-      <AccountNav />
+      <SiteNav current="account" />
       <main className="acct-page wrap" id="top">
         <h1 className="serif">Account</h1>
         {user === undefined && <p className="hint">Loading…</p>}

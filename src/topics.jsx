@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight } from './icons.jsx';
-import { TierBadge, Pricing, FinalCTA, Footer, NavCta } from './sections.jsx';
+import { TierBadge, Pricing, FinalCTA, Footer, SiteNav } from './sections.jsx';
 // Dedicated Topics page — the full 4-skill curriculum.
 // Craft and Structure is position 01 (the only currently free + practiceable topic).
 
@@ -22,27 +22,6 @@ const TOPICS_FULL = [
   { n: 3, name: "Expression of Ideas",          desc: "Rhetorical synthesis and transitions.",                     long: "Connect ideas with rhetorical control — the highest-leverage Writing moves, solved methodically.", href: "practice.html?topic=expression-of-ideas", available: true },
   { n: 4, name: "Standard English Conventions", desc: "Punctuation, grammar, and sentence boundaries.",            long: "Comma, semicolon, colon, dash. Rules — not vibes.", href: "practice.html?topic=standard-english-conventions", available: true },
 ];
-
-function TopicsNav() {
-  return (
-    <nav className="nav">
-      <div className="wrap nav-inner">
-        <a href="index.html" className="brand">
-          <span className="brand-mark">i</span>
-          <span>iSATPrep</span>
-        </a>
-        <div className="nav-links">
-          <a href="index.html#method">Method</a>
-          <a href="topics.html" aria-current="page">Topics</a>
-          <a href="tests.html">Practice Test</a>
-          <a href="index.html#instructor">About</a>
-          <a href="index.html#pricing">Pricing</a>
-        </div>
-        <NavCta />
-      </div>
-    </nav>
-  );
-}
 
 function TopicsHero() {
   return (
@@ -146,7 +125,7 @@ function TopicsApp() {
 
   return (
     <div data-screen-label="Topics · Curriculum index">
-      <TopicsNav />
+      <SiteNav current="topics" />
       <TopicsHero />
       <TopicsGrid />
       <Pricing />

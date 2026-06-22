@@ -1,30 +1,10 @@
 import React from 'react';
-import { Footer, NavCta } from './sections.jsx';
+import { Footer, SiteNav } from './sections.jsx';
 import { TESTS, DOMAINS, planAllows } from './data/tests.js';
 import { onUserChanged, isFirebaseConfigured, getUserDoc } from './firebase.js';
 
 // Practice Test catalog. Free users see the full catalog but every test is
 // locked with an upgrade nudge; paid users can start any test.
-
-function TestsNav() {
-  return (
-    <nav className="nav">
-      <div className="wrap nav-inner">
-        <a href="index.html" className="brand">
-          <span className="brand-mark">i</span>
-          <span>iSATPrep</span>
-        </a>
-        <div className="nav-links">
-          <a href="index.html#method">Method</a>
-          <a href="topics.html">Topics</a>
-          <a href="practice.html">Practice</a>
-          <a href="tests.html" aria-current="page">Practice Test</a>
-        </div>
-        <NavCta />
-      </div>
-    </nav>
-  );
-}
 
 function TestCard({ test, allowed }) {
   const total = test.modules.reduce((n, m) => n + m.count, 0);
@@ -73,7 +53,7 @@ function TestsApp() {
 
   return (
     <div data-screen-label="Practice Tests">
-      <TestsNav />
+      <SiteNav current="tests" />
       <main className="tl-page wrap" id="top">
         <header className="tl-head">
           <span className="tl-eyebrow mono">Practice Test</span>
