@@ -146,15 +146,18 @@ function Demo({ onOpenDemo }) {
         <div className="section-head center">
           <h2>Watch the method solve a real passage.</h2>
         </div>
-        <div className="demo-card" onClick={onOpenDemo} role="button" tabIndex={0} aria-label="Play 2 minute demo walkthrough" onKeyDown={(e)=>e.key==="Enter"&&onOpenDemo()}>
-          {/* YouTube thumbnail preview. maxresdefault isn't guaranteed to exist for
-              every video, so fall back to hqdefault (always present) on error. */}
-          <img
-            className="demo-thumb"
-            src="https://img.youtube.com/vi/z3ZQ-9Cn8TE/maxresdefault.jpg"
-            onError={(e)=>{ e.currentTarget.src = "https://img.youtube.com/vi/z3ZQ-9Cn8TE/hqdefault.jpg"; }}
-            alt="Preview of the iSATPrep method walkthrough video"
-          />
+        <div className="demo-card" onClick={onOpenDemo} role="button" tabIndex={0} onKeyDown={(e)=>e.key==="Enter"&&onOpenDemo()}>
+          <svg className="deco" viewBox="0 0 800 450" preserveAspectRatio="none">
+            <defs>
+              <pattern id="dotgrid" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1" fill="#fff"/>
+              </pattern>
+            </defs>
+            <rect width="800" height="450" fill="url(#dotgrid)"/>
+            <path d="M50 350 Q 200 250 400 320 T 750 280" stroke="#F59E0B" strokeWidth="2" fill="none" opacity="0.4"/>
+            <circle cx="160" cy="120" r="80" fill="none" stroke="#fff" strokeWidth="1" opacity="0.4"/>
+            <rect x="540" y="60" width="180" height="120" fill="none" stroke="#fff" strokeWidth="1" opacity="0.4"/>
+          </svg>
           <div className="play"><PlayIcon size={36} /></div>
         </div>
         <div className="demo-caption">

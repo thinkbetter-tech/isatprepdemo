@@ -42,11 +42,12 @@ function App() {
   const [demoOpen, setDemoOpen] = React.useState(false);
 
   // Single source-of-truth for "user invoked the demo" (Hero "Watch demo" button
-  // and the Demo card both call this). Opens the video modal. trackEvent() is a
-  // safe no-op until analytics consent is granted.
+  // and the Demo card both call this). This is the most accurate trigger point —
+  // it fires exactly when the user acts, regardless of where the action then
+  // navigates. trackEvent() is a safe no-op until analytics consent is granted.
   const openDemo = React.useCallback(() => {
     trackEvent('demo_video_open');
-    setDemoOpen(true);
+    document.getElementById('method')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
   // Apply tweaks to :root
