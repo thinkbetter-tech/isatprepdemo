@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight } from './icons.jsx';
-import { TierBadge, Pricing, FinalCTA, Footer } from './sections.jsx';
+import { TierBadge, Pricing, FinalCTA, Footer, NavCta } from './sections.jsx';
 // Dedicated Topics page — the full 4-skill curriculum.
 // Craft and Structure is position 01 (the only currently free + practiceable topic).
 
@@ -37,10 +37,7 @@ function TopicsNav() {
           <a href="index.html#instructor">About</a>
           <a href="index.html#pricing">Pricing</a>
         </div>
-        <div className="nav-cta">
-          <a href="login.html" className="btn btn-ghost btn-sm">Log in</a>
-          <a href="signup.html?plan=free" className="btn btn-primary btn-sm">Start free</a>
-        </div>
+        <NavCta />
       </div>
     </nav>
   );

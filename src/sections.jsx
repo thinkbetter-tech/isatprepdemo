@@ -1,5 +1,6 @@
 import React from 'react';
 import { Check, NoCheck, ArrowRight, Plus, PlayIcon, GlyphRead, GlyphFormula, GlyphEliminate, HeroDiagram } from './icons.jsx';
+import { onUserChanged, signOutUser, isFirebaseConfigured } from './firebase.js';
 // iSATPrep — page sections
 
 const TESTIMONIALS = [
@@ -40,6 +41,45 @@ function SkipLink() {
   return <a href="#top" className="skip-link">Skip to main content</a>;
 }
 
+// Auth-aware nav CTA. Subscribes to auth state so the marketing pages reflect a
+// signed-in session (otherwise navigating from the practice page back to a
+// marketing page looks like a logout, even though the session persists).
+// `undefined` = still resolving (render nothing to avoid a Login→Account flash);
+// `null` = signed out; object = signed in.
+function NavCta() {
+  const [user, setUser] = React.useState(isFirebaseConfigured() ? undefined : null);
+
+  React.useEffect(() => {
+    if (!isFirebaseConfigured()) return undefined;
+    const unsub = onUserChanged((u) => setUser(u || null));
+    return () => unsub();
+  }, []);
+
+  if (user === undefined) return <div className="nav-cta" aria-hidden="true" />;
+
+  if (user) {
+    return (
+      <div className="nav-cta">
+        <a href="practice.html" className="btn btn-ghost btn-sm">My practice</a>
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          onClick={async () => { try { await signOutUser(); } catch {} window.location.reload(); }}
+        >
+          Sign out
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="nav-cta">
+      <a href="login.html" className="btn btn-ghost btn-sm">Log in</a>
+      <a href="signup.html" className="btn btn-primary btn-sm">Start free <ArrowRight size={14} /></a>
+    </div>
+  );
+}
+
 function Nav({ onOpenDemo }) {
   return (
     <nav className="nav">
@@ -56,10 +96,7 @@ function Nav({ onOpenDemo }) {
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
         </div>
-        <div className="nav-cta">
-          <a href="login.html" className="btn btn-ghost btn-sm">Log in</a>
-          <a href="signup.html" className="btn btn-primary btn-sm">Start free <ArrowRight size={14} /></a>
-        </div>
+        <NavCta />
       </div>
     </nav>
   );
@@ -465,6 +502,6 @@ function VideoModal({ open, onClose, url }) {
   );
 }
 
-Object.assign(window, { Nav, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
+Object.assign(window, { Nav, NavCta, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
 
-export { Nav, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };
+export { Nav, NavCta, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };
