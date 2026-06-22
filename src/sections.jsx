@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, NoCheck, ArrowRight, Plus, PlayIcon, GlyphRead, GlyphFormula, GlyphEliminate, HeroDiagram } from './icons.jsx';
-import { onUserChanged, signOutUser, isFirebaseConfigured } from './firebase.js';
+import { onUserChanged, signOutUser, deleteAccount, isFirebaseConfigured } from './firebase.js';
 // iSATPrep — page sections
 
 const TESTIMONIALS = [
@@ -41,11 +41,109 @@ function SkipLink() {
   return <a href="#top" className="skip-link">Skip to main content</a>;
 }
 
-// Auth-aware nav CTA. Subscribes to auth state so the marketing pages reflect a
-// signed-in session (otherwise navigating from the practice page back to a
-// marketing page looks like a logout, even though the session persists).
-// `undefined` = still resolving (render nothing to avoid a Login→Account flash);
-// `null` = signed out; object = signed in.
+// Canonical signed-in account control: "Name ▾" dropdown → Sign out + Delete
+// account (with confirm dialog). Used in EVERY nav across the site so the
+// account UX is identical everywhere. Renders nothing when signed out /
+// unconfigured (NavCta decides what to show in that case).
+function AccountControl() {
+  const [user, setUser] = React.useState(null);
+  const [open, setOpen] = React.useState(false);
+  const [confirming, setConfirming] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!isFirebaseConfigured()) return undefined;
+    const unsub = onUserChanged((u) => setUser(u));
+    return () => unsub();
+  }, []);
+
+  // Close the dropdown on outside click / Escape.
+  React.useEffect(() => {
+    if (!open) return undefined;
+    const onDoc = (e) => { if (!e.target.closest('.acct')) setOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('click', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('click', onDoc); document.removeEventListener('keydown', onKey); };
+  }, [open]);
+
+  if (!user) return null;
+
+  const onSignOut = async () => {
+    try { await signOutUser(); } catch { /* ignore */ }
+    window.location.href = 'index.html';
+  };
+
+  const onDelete = async () => {
+    setBusy(true); setErr(null);
+    try {
+      await deleteAccount();
+      window.location.href = 'index.html';
+    } catch (e) {
+      setBusy(false);
+      if (e && e.code === 'auth/requires-recent-login') {
+        setErr('For your security, please log in again, then retry deletion.');
+      } else if (e && e.code === 'auth/popup-closed-by-user') {
+        setErr('Re-authentication was cancelled. Account not deleted.');
+      } else {
+        setErr('Could not delete the account. Please try again or contact hello@isatprep.net.');
+      }
+    }
+  };
+
+  return (
+    <div className="acct">
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm acct-toggle"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {user.displayName || user.email || 'Account'} ▾
+      </button>
+      {open && (
+        <div className="acct-menu" role="menu" aria-label="Account">
+          <button type="button" role="menuitem" className="acct-item" onClick={onSignOut}>
+            Sign out
+          </button>
+          <button type="button" role="menuitem" className="acct-item acct-item-danger" onClick={() => { setOpen(false); setConfirming(true); }}>
+            Delete account
+          </button>
+        </div>
+      )}
+
+      {confirming && (
+        <div className="acct-backdrop" role="dialog" aria-modal="true" aria-labelledby="del-title" onClick={() => !busy && setConfirming(false)}>
+          <div className="acct-dialog" onClick={(e) => e.stopPropagation()}>
+            <h2 id="del-title" className="serif">Delete your account?</h2>
+            <p>
+              This permanently deletes your account and all associated data
+              (profile and saved progress). This cannot be undone.
+            </p>
+            {err && <p className="acct-err" role="alert">{err}</p>}
+            <div className="acct-dialog-actions">
+              <button type="button" className="btn btn-outline" disabled={busy} onClick={() => setConfirming(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" disabled={busy} onClick={onDelete}>
+                {busy ? 'Deleting…' : 'Delete permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Auth-aware nav CTA. Subscribes to auth state so every page reflects a
+// signed-in session (otherwise navigating between pages looks like a logout,
+// even though the session persists). Signed in → the AccountControl dropdown
+// (+ a "My practice" link); signed out → Log in / Start free.
+// `undefined` = still resolving (render a placeholder to avoid a Login→Account
+// flash); `null` = signed out; object = signed in.
 function NavCta() {
   const [user, setUser] = React.useState(isFirebaseConfigured() ? undefined : null);
 
@@ -61,13 +159,7 @@ function NavCta() {
     return (
       <div className="nav-cta">
         <a href="practice.html" className="btn btn-ghost btn-sm">My practice</a>
-        <button
-          type="button"
-          className="btn btn-primary btn-sm"
-          onClick={async () => { try { await signOutUser(); } catch {} window.location.reload(); }}
-        >
-          Sign out
-        </button>
+        <AccountControl />
       </div>
     );
   }
@@ -502,6 +594,6 @@ function VideoModal({ open, onClose, url }) {
   );
 }
 
-Object.assign(window, { Nav, NavCta, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
+Object.assign(window, { Nav, NavCta, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
 
-export { Nav, NavCta, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };
+export { Nav, NavCta, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };
