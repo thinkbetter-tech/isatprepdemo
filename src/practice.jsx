@@ -3,9 +3,12 @@ import { Footer } from './sections.jsx';
 import { DemoBanner, PreviewNav } from './preview.jsx';
 import {
   trackEvent, onUserChanged, signOutUser, deleteAccount,
-  isFirebaseConfigured,
+  isFirebaseConfigured, recordAnswer, getLessonProgress,
 } from './firebase.js';
 // Practice page for "Craft and Structure" — 4 unlocked questions + 96 locked.
+
+// Stable lesson id for this module's progress doc (progress/{uid}/lessons/{id}).
+const LESSON_ID = 'craft-and-structure';
 
 // Module-scoped guard: fire `practice_start` ONCE per page session, the first
 // time a user begins a question (any card), not on every attempt/re-render.
@@ -252,12 +255,22 @@ function LockIcon({size=14}) {
   );
 }
 
-function QuestionCard({ q, idx }) {
+function QuestionCard({ q, idx, savedAnswer }) {
   const [phase, setPhase] = React.useState("idle"); // idle | attempting | submitted | reviewing
   const [pick, setPick] = React.useState(null);
   const [playing, setPlaying] = React.useState(false);
   const [audioErr, setAudioErr] = React.useState(false);
   const audioRef = React.useRef(null);
+
+  // Restore a previously-saved answer once progress loads (resume state).
+  React.useEffect(() => {
+    if (savedAnswer && savedAnswer.pick && phase === "idle") {
+      setPick(savedAnswer.pick);
+      setPhase("submitted");
+    }
+    // Only when the saved answer first arrives; user interaction takes over after.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedAnswer]);
 
   const correct = pick === q.answer;
   const passageParas = q.passage.split("\n\n");
@@ -358,6 +371,8 @@ function QuestionCard({ q, idx }) {
                   // Funnel signal: an answer was submitted, with whether it was correct
                   // and which question. No-op until analytics consent is granted.
                   trackEvent('practice_answer_submit', { question_id: q.id, correct });
+                  // Persist the answer for resume (no-op when signed out / unconfigured).
+                  recordAnswer(LESSON_ID, q.id, pick, correct);
                   setPhase("submitted");
                 }}>
                   Submit answer <span className="btn-arrow">→</span>
@@ -458,6 +473,19 @@ function PracticeApp() {
   const previewN = parseInt(params.get("n"), 10);
   const backN = previewN >= 1 && previewN <= 4 ? previewN : 1;
 
+  // Load saved progress for this lesson once (resume state). `answers` maps
+  // questionId -> { pick, correct }. Empty when signed out / no prior progress.
+  const [answers, setAnswers] = React.useState(null);
+  React.useEffect(() => {
+    let alive = true;
+    // Don't resume in the preview/demo flow — that's a marketing walkthrough.
+    if (fromPreview) return undefined;
+    getLessonProgress(LESSON_ID).then((doc) => {
+      if (alive && doc && doc.answers) setAnswers(doc.answers);
+    });
+    return () => { alive = false; };
+  }, [fromPreview]);
+
   return (
     <div data-screen-label="Practice · Craft and Structure">
       {fromPreview && <DemoBanner plan={previewPlan} />}
@@ -473,7 +501,10 @@ function PracticeApp() {
       <section style={{padding:"1rem 0 5rem"}}>
         <div className="wrap" style={{maxWidth:980}}>
           <div className="qlist">
-            {QUESTIONS.map((q, i) => <QuestionCard key={q.id} q={q} idx={i}/>)}
+            {QUESTIONS.map((q, i) => (
+              <QuestionCard key={q.id} q={q} idx={i}
+                savedAnswer={answers ? answers[String(q.id)] : null} />
+            ))}
           </div>
         </div>
       </section>

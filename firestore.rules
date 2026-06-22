@@ -27,12 +27,6 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    // The set of fields the client is NEVER allowed to introduce or mutate.
-    // These are written exclusively by trusted server code (Admin SDK).
-    function noPrivilegedFields(data) {
-      return !data.keys().hasAny(['plan', 'entitlements', 'admin']);
-    }
-
     // On create we allow a `plan` field ONLY if it is exactly the 'free'
     // default. `entitlements` / `admin` may still never be set by the client.
     function planIsFreeDefaultOnly(data) {

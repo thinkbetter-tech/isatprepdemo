@@ -75,6 +75,34 @@ export function isFirebaseConfigured() {
   return getFirebaseConfig() !== null;
 }
 
+/** reCAPTCHA site key for App Check, or undefined if not provisioned yet. */
+function getAppCheckSiteKey() {
+  const env = import.meta.env || {};
+  return env.VITE_APPCHECK_SITE_KEY || undefined;
+}
+
+/**
+ * Initializes Firebase App Check with reCAPTCHA v3/Enterprise, gated on
+ * VITE_APPCHECK_SITE_KEY. No-op when the key is absent so the app works before
+ * App Check is set up. Failures are swallowed — App Check must never break the
+ * app from the client side (server-side enforcement is what actually protects).
+ */
+async function initAppCheck(appInstance) {
+  const siteKey = getAppCheckSiteKey();
+  if (!siteKey) return; // not provisioned yet — skip
+  try {
+    const acMod = await import('firebase/app-check');
+    // Optional debug token for local/dev (set window.FIREBASE_APPCHECK_DEBUG_TOKEN
+    // = true in a dev console to register a debug device in the Firebase console).
+    acMod.initializeAppCheck(appInstance, {
+      provider: new acMod.ReCaptchaV3Provider(siteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch {
+    /* App Check init must never throw into app startup */
+  }
+}
+
 /**
  * Initializes app + auth + firestore exactly once and returns
  * `{ app, auth, db, analytics }`, or `null` when unconfigured.
@@ -94,6 +122,15 @@ export function getFirebase() {
   ]).then(async ([appMod, authMod, fsMod]) => {
     const { initializeApp, getApps } = appMod;
     app = getApps().length ? getApps()[0] : initializeApp(config);
+
+    // App Check (Phase 2B): proves requests come from our real app, not a script
+    // with a stolen API key. Gated on VITE_APPCHECK_SITE_KEY (a reCAPTCHA v3 /
+    // Enterprise site key). Without it, App Check is skipped entirely — so the
+    // app keeps working before App Check is provisioned, and enforcement can be
+    // turned on later in the console without a code change. Must initialize
+    // BEFORE auth/firestore are used so tokens attach to their requests.
+    await initAppCheck(app);
+
     auth = authMod.getAuth(app);
     db = fsMod.getFirestore(app);
 
@@ -392,4 +429,83 @@ export async function ensureUserDoc(user, extra = {}) {
     data.selectedPlan = extra.selectedPlan;
   }
   await _sdk.setDoc(ref, data);
+}
+
+// -----------------------------------------------------------------------------
+// Lesson progress (Phase 2A) — per-user, owned data under progress/{uid}/lessons
+// -----------------------------------------------------------------------------
+// Document path: progress/{uid}/lessons/{lessonId}
+// Shape: { lessonId, answers: { [questionId]: { pick, correct } }, completed,
+//          lastQuestionId, updatedAt }
+// Firestore rules already allow a user read/write only under their own
+// progress/{uid}/** (see firestore.rules). All helpers no-op safely without a
+// signed-in user / Firebase config so the demo still works offline.
+
+/** Returns the current signed-in user's uid, or null. */
+function currentUid() {
+  return (auth && auth.currentUser && auth.currentUser.uid) || null;
+}
+
+/**
+ * Merge-saves progress for one lesson. `patch` is shallow-merged into the
+ * existing doc, so callers can update just `answers`/`lastQuestionId`/`completed`
+ * without clobbering the rest. No-op (resolves) if unconfigured or signed out.
+ */
+export async function saveLessonProgress(lessonId, patch) {
+  if (!isFirebaseConfigured()) return;
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid || !lessonId) return;
+  const ref = _sdk.doc(db, 'progress', uid, 'lessons', String(lessonId));
+  try {
+    await _sdk.setDoc(
+      ref,
+      { lessonId: String(lessonId), updatedAt: _sdk.serverTimestamp(), ...patch },
+      { merge: true },
+    );
+  } catch {
+    /* progress is best-effort; never surface storage errors into practice UX */
+  }
+}
+
+/**
+ * Records a single answered question into the lesson's `answers` map and tracks
+ * the last question answered (for resume). Uses a dotted field path so only that
+ * one answer key is written. No-op when signed out / unconfigured.
+ */
+export async function recordAnswer(lessonId, questionId, pick, correct) {
+  if (!isFirebaseConfigured()) return;
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid || !lessonId || questionId == null) return;
+  const ref = _sdk.doc(db, 'progress', uid, 'lessons', String(lessonId));
+  try {
+    await _sdk.setDoc(
+      ref,
+      {
+        lessonId: String(lessonId),
+        lastQuestionId: questionId,
+        updatedAt: _sdk.serverTimestamp(),
+        answers: { [String(questionId)]: { pick, correct } },
+      },
+      { merge: true },
+    );
+  } catch {
+    /* best-effort */
+  }
+}
+
+/** Loads a lesson's progress doc, or null if none / signed out / unconfigured. */
+export async function getLessonProgress(lessonId) {
+  if (!isFirebaseConfigured()) return null;
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid || !lessonId) return null;
+  try {
+    const ref = _sdk.doc(db, 'progress', uid, 'lessons', String(lessonId));
+    const snap = await _sdk.getDoc(ref);
+    return snap.exists() ? snap.data() : null;
+  } catch {
+    return null;
+  }
 }
