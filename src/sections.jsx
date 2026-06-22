@@ -47,6 +47,7 @@ function SkipLink() {
 // unconfigured (NavCta decides what to show in that case).
 function AccountControl() {
   const [user, setUser] = React.useState(null);
+  const [plan, setPlan] = React.useState('free');
   const [open, setOpen] = React.useState(false);
   const [confirming, setConfirming] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -54,7 +55,15 @@ function AccountControl() {
 
   React.useEffect(() => {
     if (!isFirebaseConfigured()) return undefined;
-    const unsub = onUserChanged((u) => setUser(u));
+    const unsub = onUserChanged(async (u) => {
+      setUser(u);
+      if (u) {
+        try { const doc = await getUserDoc(); setPlan((doc && doc.plan) || 'free'); }
+        catch { setPlan('free'); }
+      } else {
+        setPlan('free');
+      }
+    });
     return () => unsub();
   }, []);
 
@@ -69,6 +78,10 @@ function AccountControl() {
   }, [open]);
 
   if (!user) return null;
+
+  const PLAN_LABEL = { free: 'Free', core: 'Core', complete: 'Complete' };
+  const planName = PLAN_LABEL[plan] || 'Free';
+  const isPaid = plan === 'core' || plan === 'complete';
 
   const onSignOut = async () => {
     try { await signOutUser(); } catch { /* ignore */ }
@@ -101,10 +114,19 @@ function AccountControl() {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        {user.displayName || user.email || 'Account'} ▾
+        <span className="acct-name">{user.displayName || user.email || 'Account'}</span>
+        {isPaid && <span className="plan-badge" title={`${planName} plan`}>{planName}</span>}
+        <span aria-hidden="true">▾</span>
       </button>
       {open && (
         <div className="acct-menu" role="menu" aria-label="Account">
+          <div className="acct-menu-head">
+            <div className="acct-menu-email">{user.email}</div>
+            <div className={'acct-menu-plan' + (isPaid ? ' paid' : '')}>
+              {isPaid ? `★ ${planName} — full access` : 'Free plan'}
+              {!isPaid && <a href="index.html#pricing" className="acct-menu-upgrade">Upgrade</a>}
+            </div>
+          </div>
           <a href="account.html" role="menuitem" className="acct-item">
             Account &amp; settings
           </a>
