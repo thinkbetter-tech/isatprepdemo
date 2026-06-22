@@ -563,8 +563,26 @@ was the intent; this is the reality, including features added beyond the origina
   there is **no per-question timing, no per-question answer history, and no multi-attempt history**.
   The post-test analysis feature (§13 / `docs/POST-TEST-ANALYSIS-PLAN.md`) depends on fixing this.
 
+### 12.7b Post-test analysis (LIVE) + admin analytics (scoped)
+- **Student post-test analysis: BUILT & LIVE** — per-question **timing** captured in the runner;
+  full **attempt history** at `progress/{uid}/attempts/**`; `src/data/analysisEngine.js` +
+  `Analysis` report (quick snapshot, what-you-did-right / skipped / wrong, per-question timeline,
+  tabbed review w/ explanations, drill-to-practice). **History** on the account page; any attempt
+  re-openable via `test.html?attempt=<id>`. Included in export-my-data + account deletion.
+- **Peer comparison (partial):** PII-free `testStats/{testId}` aggregate, surfaces only past
+  **10 attempts**; honest "unlocks at N students" notice otherwise. Client-side transactional update
+  for now (rules-guarded) — **server-side hardening pending** (hot-doc → function/sharded counter).
+- **Admin analytics: SCOPED, NOT BUILT** — needs Cloud Functions + an `admin` role. Full plan in
+  `docs/ADMIN-ANALYTICS-AND-FUNCTIONS.md`. Today an admin can only browse raw docs in the console /
+  see GA4 usage — no cross-student academic dashboard yet.
+- Plans: `docs/POST-TEST-ANALYSIS-PLAN.md`, `docs/ADMIN-ANALYTICS-AND-FUNCTIONS.md`.
+
 ### 12.8 Still pending for full go-live (unchanged priorities)
 - **Payments / Stripe checkout** — no real purchase flow yet; plans set only via admin. (Biggest gap.)
+- **Cloud Functions enablement milestone** — one milestone unlocking THREE things that all need
+  server-side (Admin SDK) code: **admin analytics dashboard**, **peer-stats hardening** (hot-doc →
+  function/sharded counter), and the **Stripe webhook**. Org-policy override already permits public
+  functions. Scoped in `docs/ADMIN-ANALYTICS-AND-FUNCTIONS.md`.
 - **App Check enforcement** — toggle ON after verifying token flow.
 - **Legal placeholders** + attorney review.
 - **Expert review of AI-drafted questions.**

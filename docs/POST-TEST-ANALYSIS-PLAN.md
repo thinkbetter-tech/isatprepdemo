@@ -1,5 +1,17 @@
 # Post-Test Analysis — implementation plan
 
+> **STATUS (build log):** Phases 1–5 are **BUILT & LIVE** — per-question timing capture, full
+> attempt persistence (`progress/{uid}/attempts/**`, with history), pure `analysisEngine.js`, the
+> rich `Analysis` report (snapshot / right / skipped / wrong / timeline / tabbed review), and the
+> account-page **history** list (`test.html?attempt=<id>` re-renders any attempt). **Peer comparison
+> (Phase 6) is partially live**: a PII-free `testStats/{testId}` aggregate updates on submit
+> (client-side, transactional, rules-guarded) and surfaces only past **10 attempts**
+> (`PEER_MIN_ATTEMPTS`), degrading to an honest "unlocks at N students" notice. The **server-side
+> hardening** of that aggregate (Cloud Function) + **admin analytics** are scoped in
+> `docs/ADMIN-ANALYTICS-AND-FUNCTIONS.md`. No hardcoded/sample data anywhere; all empty/threshold
+> states handled.
+
+
 Goal: after a student finishes a Mock Test, give them a **detailed, easy-to-consume analysis** —
 quick snapshot → what they got right → what they skipped → what they got wrong — with
 **per-question timing** and, where available, **peer comparison**. Also accessible **later** from

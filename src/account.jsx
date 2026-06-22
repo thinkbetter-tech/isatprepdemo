@@ -5,6 +5,7 @@ import {
   getUserDoc, updateDisplayName, changePassword, sendReset,
   exportUserData, getEmailPrefs, setEmailPrefs, getAllProgress,
   getConsent, setConsent, linkGoogle, linkEmailPassword, unlinkProvider,
+  listAttempts,
 } from './firebase.js';
 
 // Account / Settings page. Sections: profile, plan, password, export,
@@ -215,6 +216,40 @@ function ProgressSection() {
   );
 }
 
+// Mock-test history — list of past attempts, each links to its full analysis.
+function TestHistorySection() {
+  const [rows, setRows] = React.useState(null);
+  React.useEffect(() => { listAttempts().then(setRows); }, []);
+  if (rows === null) return null;
+  return (
+    <section className="acct-section">
+      <h2 className="serif">Mock test history</h2>
+      {rows.length === 0 ? (
+        <p className="hint">No mock tests taken yet. <a href="tests.html">Take a test →</a></p>
+      ) : (
+        <ul className="tq-history">
+          {rows.map((r) => {
+            const sc = r.score || {};
+            const date = r.startedAt ? new Date(r.startedAt).toLocaleDateString() : '';
+            return (
+              <li key={r.id}>
+                <div>
+                  <div className="tq-hist-title">{r.testTitle || r.testId}</div>
+                  <div className="tq-hist-meta">
+                    {date}{sc.scaledEstimate != null ? ` · est. ${sc.scaledEstimate}` : ''}
+                    {sc.total ? ` · ${sc.correct}/${sc.total} correct` : ''}
+                  </div>
+                </div>
+                <a className="btn btn-outline btn-sm" href={`test.html?attempt=${encodeURIComponent(r.id)}`}>View analysis →</a>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function ConsentSection() {
   const [state, setState] = React.useState(getConsent());
   const granted = state === 'granted';
@@ -321,6 +356,7 @@ function AccountApp() {
             <PasswordSection hasPassword={linkedProviders().includes('password')} />
             <ConnectionsSection onChanged={refresh} />
             <EmailPrefsSection />
+            <TestHistorySection />
             <ProgressSection />
             <ConsentSection />
             <ExportSection />

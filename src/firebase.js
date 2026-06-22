@@ -160,10 +160,16 @@ export function getFirebase() {
       doc: fsMod.doc,
       getDoc: fsMod.getDoc,
       setDoc: fsMod.setDoc,
+      addDoc: fsMod.addDoc,
       deleteDoc: fsMod.deleteDoc,
       collection: fsMod.collection,
       getDocs: fsMod.getDocs,
+      query: fsMod.query,
+      orderBy: fsMod.orderBy,
+      limit: fsMod.limit,
       serverTimestamp: fsMod.serverTimestamp,
+      increment: fsMod.increment,
+      runTransaction: fsMod.runTransaction,
     };
 
     return { app, auth, db, analytics };
@@ -352,6 +358,11 @@ export async function deleteAccount() {
   } catch {
     /* no progress data, or rules deny — proceed to profile + auth deletion */
   }
+  try {
+    const attempts = _sdk.collection(db, 'progress', uid, 'attempts');
+    const snap = await _sdk.getDocs(attempts);
+    await Promise.all(snap.docs.map((d) => _sdk.deleteDoc(d.ref)));
+  } catch { /* best-effort */ }
   try {
     await _sdk.deleteDoc(_sdk.doc(db, 'users', uid));
   } catch {
@@ -625,6 +636,10 @@ export async function exportUserData() {
     const lessons = await _sdk.getDocs(_sdk.collection(db, 'progress', u.uid, 'lessons'));
     out.progress = lessons.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch { /* ignore */ }
+  try {
+    const attempts = await _sdk.getDocs(_sdk.collection(db, 'progress', u.uid, 'attempts'));
+    out.testAttempts = attempts.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch { /* ignore */ }
   return out;
 }
 
@@ -709,4 +724,157 @@ export async function unlinkProvider(providerId) {
     throw e;
   }
   await _sdk.unlink(u, providerId);
+}
+
+// -----------------------------------------------------------------------------
+// Mock-test attempts + peer aggregates (post-test analysis)
+// -----------------------------------------------------------------------------
+// PRODUCTION-SAFE design (no hardcoded/sample data anywhere):
+//   - Each attempt is a real document at progress/{uid}/attempts/{autoId},
+//     keeping full per-question detail + timing + history (never overwritten).
+//   - Peer comparison reads an AGGREGATE doc testStats/{testId} that contains
+//     ONLY counts/sums (no PII, no per-user rows). It is incremented atomically
+//     when an attempt is saved. Peer stats only surface once attempts >= a
+//     threshold (handled by callers); all helpers degrade gracefully to null/[]
+//     when there is no data yet.
+
+export const PEER_MIN_ATTEMPTS = 10; // peer comparison hidden below this
+
+/**
+ * Persist a completed attempt and (best-effort) update the peer aggregate.
+ * Returns the new attemptId, or null when signed out / unconfigured.
+ * `attempt` must be a plain, fully-resolved object (no timestamps from the
+ * client clock — we stamp finishedAt with serverTimestamp).
+ */
+export async function saveAttempt(attempt) {
+  if (!isFirebaseConfigured()) return null;
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid) return null;
+  let id = null;
+  try {
+    const col = _sdk.collection(db, 'progress', uid, 'attempts');
+    const ref = await _sdk.addDoc(col, { ...attempt, savedAt: _sdk.serverTimestamp() });
+    id = ref.id;
+  } catch {
+    return null; // never let a save failure break the results screen
+  }
+  // Best-effort peer aggregate update (separate so its failure can't lose the attempt).
+  try { await updatePeerStats(attempt); } catch { /* ignore */ }
+  return id;
+}
+
+/** List the signed-in user's past attempts, newest first. [] when none/unconfigured. */
+export async function listAttempts(max = 50) {
+  if (!isFirebaseConfigured()) return [];
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid) return [];
+  try {
+    const col = _sdk.collection(db, 'progress', uid, 'attempts');
+    const q = _sdk.query(col, _sdk.orderBy('startedAt', 'desc'), _sdk.limit(max));
+    const snap = await _sdk.getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch {
+    return [];
+  }
+}
+
+/** Load one attempt by id (own data). null when missing/unconfigured. */
+export async function getAttempt(attemptId) {
+  if (!isFirebaseConfigured() || !attemptId) return null;
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid) return null;
+  try {
+    const snap = await _sdk.getDoc(_sdk.doc(db, 'progress', uid, 'attempts', attemptId));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Atomically fold one attempt into the public, PII-free aggregate
+ * testStats/{testId}. Stores running sums so means/variance are derivable, a
+ * coarse score histogram (20-pt bands) for percentiles, and per-question
+ * correct/time tallies. Runs in a transaction so concurrent submits are safe.
+ */
+async function updatePeerStats(attempt) {
+  const testId = attempt && attempt.testId;
+  if (!testId) return;
+  const ref = _sdk.doc(db, 'testStats', testId);
+  const score = (attempt.score && typeof attempt.score.scaledEstimate === 'number')
+    ? attempt.score.scaledEstimate : null;
+  const band = score == null ? null : String(Math.min(800, Math.max(200, Math.floor(score / 20) * 20)));
+
+  await _sdk.runTransaction(db, async (tx) => {
+    const cur = await tx.get(ref);
+    const data = cur.exists() ? cur.data() : { attempts: 0, scoreSum: 0, scoreCount: 0, bands: {}, perQuestion: {} };
+    data.attempts = (data.attempts || 0) + 1;
+    if (score != null) {
+      data.scoreSum = (data.scoreSum || 0) + score;
+      data.scoreCount = (data.scoreCount || 0) + 1;
+      data.bands = data.bands || {};
+      data.bands[band] = (data.bands[band] || 0) + 1;
+    }
+    data.perQuestion = data.perQuestion || {};
+    for (const q of (attempt.questions || [])) {
+      const pq = data.perQuestion[q.id] || { seen: 0, correct: 0, timeSum: 0, timeCount: 0 };
+      pq.seen += 1;
+      if (q.chosen != null && q.chosen === q.correctAnswer) pq.correct += 1;
+      if (typeof q.timeSec === 'number') { pq.timeSum += q.timeSec; pq.timeCount += 1; }
+      data.perQuestion[q.id] = pq;
+    }
+    data.updatedAt = _sdk.serverTimestamp();
+    tx.set(ref, data);
+  });
+}
+
+/**
+ * Read the peer aggregate for a test and derive comparison metrics for THIS
+ * attempt. Returns { available:false } until PEER_MIN_ATTEMPTS is reached or if
+ * no data exists — callers render "not enough data yet" in that case. Never
+ * throws; never returns fabricated numbers.
+ */
+export async function getPeerComparison(testId, myAttempt) {
+  if (!isFirebaseConfigured() || !testId) return { available: false, reason: 'unconfigured' };
+  await ensureReady();
+  let data;
+  try {
+    const snap = await _sdk.getDoc(_sdk.doc(db, 'testStats', testId));
+    if (!snap.exists()) return { available: false, reason: 'no-data' };
+    data = snap.data();
+  } catch {
+    return { available: false, reason: 'error' };
+  }
+  const n = data.attempts || 0;
+  if (n < PEER_MIN_ATTEMPTS) return { available: false, reason: 'below-threshold', attempts: n, needed: PEER_MIN_ATTEMPTS };
+
+  const meanScore = data.scoreCount ? Math.round(data.scoreSum / data.scoreCount) : null;
+
+  // Percentile from the coarse band histogram (how many peers scored at/below me).
+  let percentile = null;
+  const myScore = myAttempt && myAttempt.score ? myAttempt.score.scaledEstimate : null;
+  if (myScore != null && data.bands && data.scoreCount) {
+    let atOrBelow = 0;
+    for (const b of Object.keys(data.bands)) {
+      if (Number(b) <= Math.floor(myScore / 20) * 20) atOrBelow += data.bands[b];
+    }
+    percentile = Math.round((atOrBelow / data.scoreCount) * 100);
+  }
+
+  // Per-question "% of peers who got this right" for the questions in my attempt.
+  const perQuestion = {};
+  for (const q of (myAttempt.questions || [])) {
+    const pq = data.perQuestion && data.perQuestion[q.id];
+    if (pq && pq.seen > 0) {
+      perQuestion[q.id] = {
+        pctCorrect: Math.round((pq.correct / pq.seen) * 100),
+        avgSec: pq.timeCount ? Math.round(pq.timeSum / pq.timeCount) : null,
+      };
+    }
+  }
+
+  return { available: true, attempts: n, meanScore, percentile, myScore, perQuestion };
 }

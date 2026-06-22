@@ -125,6 +125,15 @@ export function questionsByDomain(slug) {
   return QUESTIONS.filter((q) => q.domain === slug);
 }
 
+// id -> full question, for rendering review from a stored attempt (which holds
+// only question ids + the user's answer/timing). Built once.
+const QUESTION_INDEX = (() => {
+  const m = {};
+  for (const q of QUESTIONS) m[q.id] = q;
+  return m;
+})();
+export function questionById(id) { return QUESTION_INDEX[id] || null; }
+
 // Free-practice sample = the original 4 (the publicly unlocked questions).
 export const FREE_SAMPLE = ORIGINAL_QUESTIONS;
 

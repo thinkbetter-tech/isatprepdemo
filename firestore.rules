@@ -78,6 +78,25 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ---- testStats/{testId} -----------------------------------------------
+    // PII-FREE peer-comparison aggregate (counts/sums only — never any per-user
+    // identity). Readable by any signed-in user so peer metrics can render.
+    // Client writes are GUARDED: a signed-in user may create the doc starting at
+    // attempts==1, or update it only by incrementing `attempts` by exactly 1.
+    // This bounds aggregate tampering (no mass inflation) for the interim
+    // client-side updater. HARDENING FAST-FOLLOW: move aggregation into a Cloud
+    // Function (Admin SDK) and set `allow write: if false` here so clients can't
+    // write testStats at all. Peer metrics only surface past a min-attempts
+    // threshold (enforced in app code), so early noise is never shown.
+    match /testStats/{testId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.attempts == 1;
+      allow update: if isSignedIn()
+        && request.resource.data.attempts == resource.data.attempts + 1;
+      allow delete: if false;
+    }
+
     // ---- Default deny ------------------------------------------------------
     // Any path not explicitly matched above is denied for all clients.
     match /{document=**} {
