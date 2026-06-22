@@ -274,6 +274,16 @@ function Nav({ onOpenDemo }) {
   return <SiteNav onIndex={true} />;
 }
 
+// Primary CTA that adapts to the visitor: logged-out → Start free (signup);
+// logged-in → Go to practice (into the app, never back to a login form).
+function HeroCta() {
+  const auth = useAuthPlan();
+  if (auth.status === 'in') {
+    return <a href="practice.html" className="btn btn-primary btn-lg">Go to practice <span className="btn-arrow">→</span></a>;
+  }
+  return <a href="signup.html?plan=free" className="btn btn-primary btn-lg">Start free <span className="btn-arrow">→</span></a>;
+}
+
 function Hero({ onOpenDemo, variant }) {
   return (
     <section className={"hero" + (variant === "quiet" ? " hero-variant-quiet" : "")} id="top">
@@ -287,7 +297,7 @@ function Hero({ onOpenDemo, variant }) {
             section. No more guessing. No more second-guessing. Just results.
           </p>
           <div className="hero-ctas">
-            <a href="#pricing" className="btn btn-primary btn-lg">Start free <span className="btn-arrow">→</span></a>
+            <HeroCta />
             <button className="btn btn-outline btn-lg" onClick={onOpenDemo}>
               <PlayIcon size={14} /> Watch demo
             </button>
@@ -502,6 +512,12 @@ function PriceCard({ tier, name, price, per, tagline, features, cta, popular, pl
 }
 
 function Pricing() {
+  const auth = useAuthPlan();
+  // Paid users have nothing to buy — hide pricing entirely (keep an empty anchor
+  // so any #pricing links elsewhere don't jump to the top of the page).
+  if (auth.status === 'in' && auth.paid) {
+    return <span id="pricing" aria-hidden="true" />;
+  }
   return (
     <section className="bg-bone" id="pricing">
       <div className="wrap">
@@ -589,13 +605,24 @@ function FAQ() {
 }
 
 function FinalCTA() {
+  const auth = useAuthPlan();
+  const isIn = auth.status === 'in';
+  const isPaid = isIn && auth.paid;
   return (
     <section className="bg-amber final-cta">
       <div className="wrap">
         <h2>Ready to do English the math way?</h2>
-        <p>Start free. Upgrade when you're ready.</p>
-        <a href="#pricing" className="btn btn-lg" style={{background:"#152647", color:"#fff", borderColor:"#152647"}}>
-          Start free <span className="btn-arrow">→</span>
+        <p>
+          {isPaid ? 'Your full access is ready — jump back in.'
+            : isIn ? 'Keep practicing and track your progress.'
+            : "Start free. Upgrade when you're ready."}
+        </p>
+        <a
+          href={isIn ? 'practice.html' : 'signup.html?plan=free'}
+          className="btn btn-lg"
+          style={{background:"#152647", color:"#fff", borderColor:"#152647"}}
+        >
+          {isIn ? 'Go to practice' : 'Start free'} <span className="btn-arrow">→</span>
         </a>
       </div>
     </section>

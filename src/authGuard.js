@@ -38,6 +38,21 @@ export function requireAuth({ redirectTo = 'login.html' } = {}) {
 }
 
 /**
+ * The inverse of requireAuth: if the visitor is ALREADY signed in, send them
+ * away from this page (login/signup) into the app. Prevents a signed-in (often
+ * paid) user from being shown a login/signup form again after clicking a generic
+ * "Start free" / "Log in" CTA. No-op when unconfigured.
+ *
+ * @param {{ redirectTo?: string }} [opts]
+ */
+export function redirectIfSignedIn({ redirectTo = 'practice.html' } = {}) {
+  if (!isFirebaseConfigured()) return;
+  whenAuthReady().then((user) => {
+    if (user) window.location.href = redirectTo;
+  });
+}
+
+/**
  * Subscribe to auth state. Returns an unsubscribe function. Thin wrapper over
  * firebase.onUserChanged kept for backwards compatibility with earlier callers.
  * @param {(user: object|null) => void} cb
