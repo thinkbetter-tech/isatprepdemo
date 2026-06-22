@@ -34,6 +34,7 @@ function TopicsNav() {
         <div className="nav-links">
           <a href="index.html#method">Method</a>
           <a href="topics.html" aria-current="page">Topics</a>
+          <a href="tests.html">Practice Test</a>
           <a href="index.html#instructor">About</a>
           <a href="index.html#pricing">Pricing</a>
         </div>

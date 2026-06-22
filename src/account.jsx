@@ -45,6 +45,7 @@ function AccountNav() {
           <a href="index.html#method">Method</a>
           <a href="topics.html">Topics</a>
           <a href="practice.html">Practice</a>
+          <a href="tests.html">Practice Test</a>
         </div>
         <NavCta />
       </div>

@@ -55,6 +55,8 @@ export default defineConfig({
         topics: resolve(__dirname, 'topics.html'),
         practice: resolve(__dirname, 'practice.html'),
         account: resolve(__dirname, 'account.html'),
+        tests: resolve(__dirname, 'tests.html'),
+        test: resolve(__dirname, 'test.html'),
         'preview-dashboard': resolve(__dirname, 'preview-dashboard.html'),
         'preview-module': resolve(__dirname, 'preview-module.html'),
         'index-print': resolve(__dirname, 'index-print.html'),

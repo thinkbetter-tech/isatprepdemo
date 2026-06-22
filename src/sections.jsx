@@ -187,6 +187,7 @@ function Nav({ onOpenDemo }) {
         <div className="nav-links">
           <a href="#method">Method</a>
           <a href="topics.html">Topics</a>
+          <a href="tests.html">Practice Test</a>
           <a href="#instructor">About</a>
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>

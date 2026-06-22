@@ -113,6 +113,7 @@ function PracticeNav() {
         </a>
         <div className="nav-links">
           <a href="index.html#topics">Topics</a>
+          <a href="tests.html">Practice Test</a>
           <a href="index.html#pricing">Pricing</a>
           <a href="index.html#faq">FAQ</a>
         </div>
