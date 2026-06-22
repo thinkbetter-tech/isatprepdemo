@@ -1,23 +1,35 @@
 import React from 'react';
 import { Footer, SiteNav, cachedPlan, setCachedPlan } from './sections.jsx';
 import { TESTS, DOMAINS, planAllows } from './data/tests.js';
-import { onUserChanged, isFirebaseConfigured, getUserDoc } from './firebase.js';
+import { onUserChanged, isFirebaseConfigured, getUserDoc, listAttempts } from './firebase.js';
 
 // Practice Test catalog. Free users see the full catalog but every test is
-// locked with an upgrade nudge; paid users can start any test.
+// locked with an upgrade nudge; paid users can start any test. Each card also
+// surfaces the user's PAST attempts of that test (entry point to its analysis).
 
 // `allowed` may be null while the plan is still resolving — render a neutral
 // placeholder CTA then (no lock, no start) to avoid the locked→unlocked flicker.
-function TestCard({ test, allowed }) {
+// `attempts` = this user's past attempts of THIS test (newest first), or [].
+function TestCard({ test, allowed, attempts }) {
   const total = test.modules.reduce((n, m) => n + m.count, 0);
   const minutes = test.modules.reduce((n, m) => n + m.minutes, 0);
   const resolving = allowed === null;
   const locked = allowed === false;
+  const taken = attempts && attempts.length > 0;
+  // Glanceable status: best score across attempts (scaled if available, else raw %).
+  let statusLabel = null;
+  if (taken) {
+    const scaled = attempts.map((a) => a.score && a.score.scaledEstimate).filter((n) => typeof n === 'number');
+    if (scaled.length) statusLabel = `Taken · best ${Math.max(...scaled)}`;
+    else statusLabel = `Taken ${attempts.length}×`;
+  }
   return (
     <div className={'tl-card' + (locked ? ' locked' : '')}>
       <div className="tl-card-top">
         <span className="tl-kind mono">{test.kind === 'full' ? 'Full R&W' : 'Mini'}</span>
-        {locked && <span className="tl-lock" aria-label="Locked">🔒</span>}
+        {taken
+          ? <span className="tl-status" title={`${attempts.length} attempt${attempts.length > 1 ? 's' : ''}`}>✓ {statusLabel}</span>
+          : (locked && <span className="tl-lock" aria-label="Locked">🔒</span>)}
       </div>
       <h3>{test.title}</h3>
       <p className="tl-blurb">{test.blurb}</p>
@@ -30,9 +42,40 @@ function TestCard({ test, allowed }) {
       {resolving ? (
         <a className="btn btn-outline btn-sm" aria-hidden="true" style={{ visibility: 'hidden' }}>…</a>
       ) : allowed ? (
-        <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-primary btn-sm">Start test <span className="btn-arrow">→</span></a>
+        <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-primary btn-sm">
+          {attempts && attempts.length ? 'Retake test' : 'Start test'} <span className="btn-arrow">→</span>
+        </a>
       ) : (
         <a href="index.html#pricing" className="btn btn-outline btn-sm">Upgrade to unlock</a>
+      )}
+
+      {/* Entry point to past results for this test. */}
+      {attempts && attempts.length > 0 && (
+        <div className="tl-attempts">
+          <div className="tl-attempts-head">
+            Your results <span className="hint">({attempts.length})</span>
+          </div>
+          <ul>
+            {attempts.slice(0, 3).map((at) => {
+              const sc = at.score || {};
+              const date = at.startedAt ? new Date(at.startedAt).toLocaleDateString() : '';
+              return (
+                <li key={at.id}>
+                  <a href={`test.html?attempt=${encodeURIComponent(at.id)}`}>
+                    <span className="tl-attempt-score">
+                      {sc.scaledEstimate != null ? sc.scaledEstimate : (sc.total ? `${sc.correct}/${sc.total}` : 'View')}
+                    </span>
+                    <span className="tl-attempt-date">{date}</span>
+                    <span className="tl-attempt-go">View analysis →</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+          {attempts.length > 3 && (
+            <a className="tl-attempts-more" href="account.html">See all in history →</a>
+          )}
+        </div>
       )}
     </div>
   );
@@ -46,13 +89,27 @@ function TestsApp() {
     return cachedPlan(); // 'core'/'complete'/'free' or null
   });
 
+  // Past attempts grouped by testId (newest first). {} = none/loading.
+  const [attemptsByTest, setAttemptsByTest] = React.useState({});
+
   React.useEffect(() => {
     if (!isFirebaseConfigured()) return undefined;
     const unsub = onUserChanged(async (u) => {
-      if (!u) { setPlan('free'); setCachedPlan(null); return; }
+      if (!u) { setPlan('free'); setCachedPlan(null); setAttemptsByTest({}); return; }
       const doc = await getUserDoc();
       const p = (doc && doc.plan) || 'free';
       setPlan(p); setCachedPlan(p);
+      // Load this user's attempt history and group by test (best-effort).
+      try {
+        const all = await listAttempts(100);
+        const grouped = {};
+        for (const at of all) {
+          if (!at.testId) continue;
+          (grouped[at.testId] = grouped[at.testId] || []).push(at);
+        }
+        // listAttempts already returns newest-first; preserve that per group.
+        setAttemptsByTest(grouped);
+      } catch { /* leave empty */ }
     });
     return () => unsub();
   }, []);
@@ -84,14 +141,14 @@ function TestsApp() {
         <section className="tl-section">
           <h2 className="serif">Full Reading &amp; Writing tests</h2>
           <div className="tl-grid">
-            {full.map((t) => <TestCard key={t.id} test={t} allowed={isAllowed(t)} />)}
+            {full.map((t) => <TestCard key={t.id} test={t} allowed={isAllowed(t)} attempts={attemptsByTest[t.id]} />)}
           </div>
         </section>
 
         <section className="tl-section">
           <h2 className="serif">Domain mini-tests</h2>
           <div className="tl-grid">
-            {mini.map((t) => <TestCard key={t.id} test={t} allowed={isAllowed(t)} />)}
+            {mini.map((t) => <TestCard key={t.id} test={t} allowed={isAllowed(t)} attempts={attemptsByTest[t.id]} />)}
           </div>
         </section>
       </main>
