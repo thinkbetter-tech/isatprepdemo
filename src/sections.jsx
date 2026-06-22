@@ -676,4 +676,4 @@ function VideoModal({ open, onClose, url }) {
 
 Object.assign(window, { Nav, NavCta, SiteNav, useAuthPlan, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
 
-export { Nav, NavCta, SiteNav, useAuthPlan, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };
+export { Nav, NavCta, SiteNav, useAuthPlan, cachedPlan, setCachedPlan, AccountControl, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };

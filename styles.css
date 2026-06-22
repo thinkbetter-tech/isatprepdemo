@@ -20,7 +20,9 @@
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-html{scroll-behavior:smooth}
+/* Always reserve space for the vertical scrollbar so navigating between short
+   and tall pages doesn't shift the centered layout horizontally. */
+html{scroll-behavior:smooth; scrollbar-gutter:stable;}
 body{
   font-family:var(--sans);
   background:var(--bg);
@@ -91,7 +93,9 @@ section{padding:var(--pad-y) 0;}
 .nav-links{display:flex; gap:28px; align-items:center; font-size:14px; color:var(--ink-soft);}
 .nav-links a{transition:color .15s}
 .nav-links a:hover{color:var(--navy)}
-.nav-cta{display:flex; gap:10px; align-items:center;}
+/* Reserve a min width so the right side doesn't collapse (shifting the nav)
+   while auth state resolves and the CTA/account control mounts. */
+.nav-cta{display:flex; gap:10px; align-items:center; justify-content:flex-end; min-width:160px;}
 @media (max-width: 800px){
   .nav-links{display:none}
 }

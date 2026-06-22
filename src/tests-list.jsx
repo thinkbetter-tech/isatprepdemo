@@ -1,19 +1,23 @@
 import React from 'react';
-import { Footer, SiteNav } from './sections.jsx';
+import { Footer, SiteNav, cachedPlan, setCachedPlan } from './sections.jsx';
 import { TESTS, DOMAINS, planAllows } from './data/tests.js';
 import { onUserChanged, isFirebaseConfigured, getUserDoc } from './firebase.js';
 
 // Practice Test catalog. Free users see the full catalog but every test is
 // locked with an upgrade nudge; paid users can start any test.
 
+// `allowed` may be null while the plan is still resolving — render a neutral
+// placeholder CTA then (no lock, no start) to avoid the locked→unlocked flicker.
 function TestCard({ test, allowed }) {
   const total = test.modules.reduce((n, m) => n + m.count, 0);
   const minutes = test.modules.reduce((n, m) => n + m.minutes, 0);
+  const resolving = allowed === null;
+  const locked = allowed === false;
   return (
-    <div className={'tl-card' + (allowed ? '' : ' locked')}>
+    <div className={'tl-card' + (locked ? ' locked' : '')}>
       <div className="tl-card-top">
         <span className="tl-kind mono">{test.kind === 'full' ? 'Full R&W' : 'Mini'}</span>
-        {!allowed && <span className="tl-lock" aria-label="Locked">🔒</span>}
+        {locked && <span className="tl-lock" aria-label="Locked">🔒</span>}
       </div>
       <h3>{test.title}</h3>
       <p className="tl-blurb">{test.blurb}</p>
@@ -23,7 +27,9 @@ function TestCard({ test, allowed }) {
         <li>{minutes} min{test.breakMinutes ? ` +${test.breakMinutes} break` : ''}</li>
         {test.adaptive && <li>Adaptive</li>}
       </ul>
-      {allowed ? (
+      {resolving ? (
+        <a className="btn btn-outline btn-sm" aria-hidden="true" style={{ visibility: 'hidden' }}>…</a>
+      ) : allowed ? (
         <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-primary btn-sm">Start test <span className="btn-arrow">→</span></a>
       ) : (
         <a href="index.html#pricing" className="btn btn-outline btn-sm">Upgrade to unlock</a>
@@ -33,23 +39,28 @@ function TestCard({ test, allowed }) {
 }
 
 function TestsApp() {
-  const [plan, setPlan] = React.useState(null); // null = resolving
-  const [signedIn, setSignedIn] = React.useState(false);
+  // Seed from the cached plan so returning paid users see "Start test" with no
+  // flicker. null only when configured AND no cache (genuinely unknown yet).
+  const [plan, setPlan] = React.useState(() => {
+    if (!isFirebaseConfigured()) return 'free';
+    return cachedPlan(); // 'core'/'complete'/'free' or null
+  });
 
   React.useEffect(() => {
-    if (!isFirebaseConfigured()) { setPlan('free'); return undefined; }
+    if (!isFirebaseConfigured()) return undefined;
     const unsub = onUserChanged(async (u) => {
-      setSignedIn(!!u);
-      if (!u) { setPlan('free'); return; }
+      if (!u) { setPlan('free'); setCachedPlan(null); return; }
       const doc = await getUserDoc();
-      setPlan((doc && doc.plan) || 'free');
+      const p = (doc && doc.plan) || 'free';
+      setPlan(p); setCachedPlan(p);
     });
     return () => unsub();
   }, []);
 
   const full = TESTS.filter((t) => t.kind === 'full');
   const mini = TESTS.filter((t) => t.kind === 'mini');
-  const isAllowed = (t) => plan != null && planAllows(plan, t.requiredPlan);
+  // null plan → null allowed (resolving placeholder); otherwise real gate.
+  const isAllowed = (t) => (plan == null ? null : planAllows(plan, t.requiredPlan));
 
   return (
     <div data-screen-label="Mock Tests">
