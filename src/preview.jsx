@@ -26,7 +26,7 @@ const PROGRESS_DATA = {
   },
 };
 
-const PLAN_LABELS = { free: "Free", core: "Core", complete: "Complete" };
+const PLAN_LABELS = { free: "Free", core: "Method", complete: "Mastery" };
 
 const SAMPLE_PREVIEWS = [
   "Excerpt from a Charlotte Perkins Gilman story",
@@ -71,7 +71,7 @@ function useHashScroll() {
 
 function DemoBanner({ plan }) {
   const upgrade = plan === "complete" ? "complete" : (plan === "core" ? "complete" : "core");
-  const ctaLabel = plan === "complete" ? "Get Complete" : (plan === "core" ? "Upgrade to Complete" : "Get Core");
+  const ctaLabel = plan === "complete" ? "Get Mastery" : (plan === "core" ? "Upgrade to Mastery" : "Get Method");
   return (
     <div className="demo-banner">
       <div className="wrap demo-banner__inner">
@@ -342,7 +342,7 @@ function ModuleApp() {
   const startQ = userProgress > 0 ? userProgress + 1 : 1;
   const startCta = isPicked
     ? (userProgress > 0 ? `Resume Question ${userProgress + 1}` : "Start Question 01")
-    : (plan === "free" ? "Try 4 free questions" : "Pick this module on Core");
+    : (plan === "free" ? "Try 4 free questions" : "Pick this module on Method");
   const startHref = plan === "free"
     ? `practice.html?from=preview&plan=${plan}&n=${moduleN}&q=${startQ}`
     : isPicked
@@ -375,7 +375,7 @@ function ModuleApp() {
                 <>4 free questions to try &middot; upgrade to unlock all 100</>
               )}
               {!isPicked && plan === "core" && (
-                <>Pick this module on Core to unlock its 100 questions</>
+                <>Pick this module on Method to unlock its 100 questions</>
               )}
             </div>
             <a href={startHref} className="btn btn-primary btn-lg">

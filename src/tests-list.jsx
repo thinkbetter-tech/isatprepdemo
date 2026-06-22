@@ -52,11 +52,11 @@ function TestsApp() {
   const isAllowed = (t) => plan != null && planAllows(plan, t.requiredPlan);
 
   return (
-    <div data-screen-label="Practice Tests">
+    <div data-screen-label="Mock Tests">
       <SiteNav current="tests" />
       <main className="tl-page wrap" id="top">
         <header className="tl-head">
-          <span className="tl-eyebrow mono">Practice Test</span>
+          <span className="tl-eyebrow mono">Mock Tests</span>
           <h1 className="serif">Full-length, timed, adaptive SAT practice.</h1>
           <p className="tl-lede">
             Simulate the Digital SAT Reading &amp; Writing section — timed modules, mark-for-review,
@@ -64,7 +64,7 @@ function TestsApp() {
           </p>
           {plan === 'free' && (
             <div className="tl-upsell">
-              <span>Practice tests are a paid feature.</span>
+              <span>Mock tests are a paid feature.</span>
               <a href="index.html#pricing" className="btn btn-primary btn-sm">See plans</a>
             </div>
           )}

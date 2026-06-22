@@ -10,7 +10,7 @@ import {
 // Account / Settings page. Sections: profile, plan, password, export,
 // email prefs, progress, consent, connected sign-in methods (points 1-8).
 
-const PLAN_LABEL = { free: 'Free', core: 'Core', complete: 'Complete' };
+const PLAN_LABEL = { free: 'Free', core: 'Method', complete: 'Mastery' };
 
 function mapErr(e) {
   if (!e) return 'Something went wrong. Please try again.';

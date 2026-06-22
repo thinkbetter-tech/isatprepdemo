@@ -381,8 +381,8 @@ function SignupForm() {
 
   const PLAN_DETAILS = {
     free:     { name: "Free",     price: "$0",  note: "lifetime access" },
-    core:     { name: "Core",     price: "$59", note: "one-time · lifetime access" },
-    complete: { name: "Complete", price: "$79", note: "one-time · lifetime access" },
+    core:     { name: "Method",   price: "$59", note: "one-time · lifetime access" },
+    complete: { name: "Mastery",  price: "$79", note: "one-time · lifetime access" },
   };
   const planInfo = PLAN_DETAILS[plan] || PLAN_DETAILS.free;
 

@@ -23,7 +23,7 @@ const TOPICS = [
 ];
 
 const FAQS = [
-  { q: "What does \"choose any 2 modules\" mean on the Core plan?", a: "After you purchase Core, you'll select any 2 of the 4 modules to fully unlock — 100 practice questions per selected module. Pick the ones that match where you need the most work." },
+  { q: "What does \"choose any 2 modules\" mean on the Method plan?", a: "After you purchase Method, you'll select any 2 of the 4 modules to fully unlock — 100 practice questions per selected module. Pick the ones that match where you need the most work." },
   { q: "What if my score doesn't improve?", a: "Most students see meaningful gains within 2–4 weeks of consistent practice. If you're not improving, it only means more practice." },
   { q: "How long does each lesson take?", a: "Each module is self-paced, so you can move through it at your own speed. As you practice and become familiar with the method, you’ll gain confidence and complete the modules more quickly." },
   { q: "Why should I choose iSATPrep over others?", a: "iSATPrep isn’t a warehouse of AI-generated questions with generic explanations. Every question is carefully designed and reviewed by Shipra, a seasoned SAT tutor with over a decade of experience and a strong track record of results. This ensures that what you practice is thoughtful, effective, and truly aligned with how students improve." },
@@ -79,7 +79,7 @@ function AccountControl() {
 
   if (!user) return null;
 
-  const PLAN_LABEL = { free: 'Free', core: 'Core', complete: 'Complete' };
+  const PLAN_LABEL = { free: 'Free', core: 'Method', complete: 'Mastery' };
   const planName = PLAN_LABEL[plan] || 'Free';
   const isPaid = plan === 'core' || plan === 'complete';
 
@@ -210,17 +210,19 @@ function NavCta({ auth }) {
 }
 
 // THE canonical site nav, used on every page. Auth- and plan-aware.
-//   props: { onIndex?: boolean, current?: 'topics'|'tests'|'practice'|'account' }
+//   props: { onIndex?: boolean, current?: 'topics'|'tests'|'account' }
 // - `onIndex` makes section links use bare #anchors (smooth scroll on the home
 //   page); off-index they use absolute index.html#anchor links.
 // - "Pricing" / upgrade affordances are HIDDEN for paid users (nothing to buy).
-// - Signed-in users get "My practice"; everyone gets Topics + Practice Test.
+// - Topics is the home for practicing questions (per-topic), so there is NO
+//   separate "Practice" tab. The two learning destinations are Topics and Mock
+//   Tests — shown consistently regardless of auth state (gating happens on the
+//   page itself), which removes the earlier appears/disappears ambiguity.
 function SiteNav({ onIndex = false, current } = {}) {
   const auth = useAuthPlan();
   const home = (anchor) => (onIndex ? `#${anchor}` : `index.html#${anchor}`);
   const brandHref = onIndex ? '#top' : 'index.html';
   const isPaid = auth.status === 'in' && auth.paid;
-  const isIn = auth.status === 'in';
 
   return (
     <nav className="nav">
@@ -233,10 +235,7 @@ function SiteNav({ onIndex = false, current } = {}) {
         <div className="nav-links">
           <a href={home('method')}>Method</a>
           <a href="topics.html" aria-current={current === 'topics' ? 'page' : undefined}>Topics</a>
-          <a href="tests.html" aria-current={current === 'tests' ? 'page' : undefined}>Practice Test</a>
-          {isIn && (
-            <a href="practice.html" aria-current={current === 'practice' ? 'page' : undefined}>Practice</a>
-          )}
+          <a href="tests.html" aria-current={current === 'tests' ? 'page' : undefined}>Mock Tests</a>
           <a href={home('instructor')}>About</a>
           {/* Pricing only matters to people who can still buy: signed-out or unpaid. */}
           {!isPaid && <a href={home('pricing')}>Pricing</a>}
@@ -505,11 +504,11 @@ function Pricing() {
           />
           <PriceCard
             tier="Tier 02"
-            name="Core"
+            name="Method"
             price="59"
             per="one-time"
             tagline={<>Pick <em>any </em> two modules to master.</>}
-            cta="Get Core"
+            cta="Get Method"
             popular
             planId="core"
             showPreview
@@ -523,17 +522,17 @@ function Pricing() {
           />
           <PriceCard
             tier="Tier 03"
-            name="Complete"
+            name="Mastery"
             price="79"
             per="one-time"
             tagline={<>The <em>full</em> method, every module.</>}
-            cta="Get Complete"
+            cta="Get Mastery"
             planId="complete"
             showPreview
             features={[
               { text: "Access to all 4 modules" },
               { text: "Entire question bank and learning approaches unlocked" },
-              { text: "2 Practice Tests unlocked"},
+              { text: "2 Mock Tests unlocked"},
               { text: "Lifetime access" },
             ]}
           />
