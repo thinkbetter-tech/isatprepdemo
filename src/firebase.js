@@ -150,6 +150,12 @@ export function getFirebase() {
       signOut: authMod.signOut,
       deleteUser: authMod.deleteUser,
       reauthenticateWithPopup: authMod.reauthenticateWithPopup,
+      reauthenticateWithCredential: authMod.reauthenticateWithCredential,
+      updatePassword: authMod.updatePassword,
+      EmailAuthProvider: authMod.EmailAuthProvider,
+      linkWithPopup: authMod.linkWithPopup,
+      linkWithCredential: authMod.linkWithCredential,
+      unlink: authMod.unlink,
       // firestore
       doc: fsMod.doc,
       getDoc: fsMod.getDoc,
@@ -508,4 +514,180 @@ export async function getLessonProgress(lessonId) {
   } catch {
     return null;
   }
+}
+
+// -----------------------------------------------------------------------------
+// Account management (Account/Settings page) — points 1-8
+// -----------------------------------------------------------------------------
+
+/** The current Firebase user object (or null). For reading email/displayName/providers. */
+export function currentUser() {
+  return (auth && auth.currentUser) || null;
+}
+
+/** List of linked sign-in provider ids, e.g. ['google.com','password']. */
+export function linkedProviders() {
+  const u = currentUser();
+  return u ? (u.providerData || []).map((p) => p && p.providerId).filter(Boolean) : [];
+}
+
+/** Loads the signed-in user's profile doc (plan, name, emailPrefs, ...), or null. */
+export async function getUserDoc() {
+  if (!isFirebaseConfigured()) return null;
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid) return null;
+  try {
+    const snap = await _sdk.getDoc(_sdk.doc(db, 'users', uid));
+    return snap.exists() ? snap.data() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** (1/2) Update the display name on both the Auth profile and the user doc. */
+export async function updateDisplayName(name) {
+  await ensureReady();
+  const u = currentUser();
+  if (!u) throw new Error(NO_CURRENT_USER);
+  const clean = (name || '').trim();
+  await _sdk.updateProfile(u, { displayName: clean });
+  // Mirror to Firestore so the rest of the app can read it without the Auth object.
+  try {
+    await _sdk.setDoc(_sdk.doc(db, 'users', u.uid), { name: clean }, { merge: true });
+  } catch { /* profile mirror is best-effort */ }
+}
+
+/**
+ * (1) Change password for an email/password user. Firebase requires a recent
+ * login; if the credential is stale we re-authenticate with the current password
+ * first, then set the new one. Throws auth/* codes the UI maps to messages.
+ */
+export async function changePassword(currentPassword, newPassword) {
+  await ensureReady();
+  const u = currentUser();
+  if (!u) throw new Error(NO_CURRENT_USER);
+  try {
+    await _sdk.updatePassword(u, newPassword);
+  } catch (e) {
+    if (e && e.code === 'auth/requires-recent-login' && u.email && currentPassword) {
+      const cred = _sdk.EmailAuthProvider.credential(u.email, currentPassword);
+      await _sdk.reauthenticateWithCredential(u, cred);
+      await _sdk.updatePassword(u, newPassword);
+    } else {
+      throw e;
+    }
+  }
+}
+
+/** (3) Gathers all of the user's stored data into a plain object for export/download. */
+export async function exportUserData() {
+  await ensureReady();
+  const u = currentUser();
+  if (!u) throw new Error(NO_CURRENT_USER);
+  const out = {
+    exportedAt: new Date().toISOString(),
+    account: {
+      uid: u.uid,
+      email: u.email || null,
+      displayName: u.displayName || null,
+      providers: linkedProviders(),
+      createdAt: u.metadata && u.metadata.creationTime,
+      lastSignInAt: u.metadata && u.metadata.lastSignInTime,
+    },
+    profile: null,
+    progress: [],
+  };
+  try {
+    const profSnap = await _sdk.getDoc(_sdk.doc(db, 'users', u.uid));
+    if (profSnap.exists()) out.profile = profSnap.data();
+  } catch { /* ignore */ }
+  try {
+    const lessons = await _sdk.getDocs(_sdk.collection(db, 'progress', u.uid, 'lessons'));
+    out.progress = lessons.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch { /* ignore */ }
+  return out;
+}
+
+/** (5) Read the user's email/marketing preferences (defaults to opted-in product, opted-out marketing). */
+export async function getEmailPrefs() {
+  const doc = await getUserDoc();
+  const p = (doc && doc.emailPrefs) || {};
+  return { product: p.product !== false, marketing: p.marketing === true };
+}
+
+/** (5) Persist email preferences on the user doc. */
+export async function setEmailPrefs(prefs) {
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid) throw new Error(NO_CURRENT_USER);
+  await _sdk.setDoc(
+    _sdk.doc(db, 'users', uid),
+    { emailPrefs: { product: prefs.product !== false, marketing: prefs.marketing === true } },
+    { merge: true },
+  );
+}
+
+/** (6) Load all lesson progress docs for the dashboard. */
+export async function getAllProgress() {
+  if (!isFirebaseConfigured()) return [];
+  await ensureReady();
+  const uid = currentUid();
+  if (!uid) return [];
+  try {
+    const lessons = await _sdk.getDocs(_sdk.collection(db, 'progress', uid, 'lessons'));
+    return lessons.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch {
+    return [];
+  }
+}
+
+/** (7) Consent preference helpers for the settings page. */
+export function getConsent() {
+  if (gpcEnabled()) return 'gpc'; // browser is forcing it off
+  try {
+    return localStorage.getItem(CONSENT_KEY) || 'unset';
+  } catch {
+    return 'unset';
+  }
+}
+
+export async function setConsent(granted) {
+  try {
+    localStorage.setItem(CONSENT_KEY, granted ? 'granted' : 'denied');
+  } catch { /* ignore */ }
+  if (granted) await enableAnalyticsAfterConsent();
+  // Note: turning consent OFF stops future events; the GA instance can't be
+  // fully torn down mid-session, so it takes effect cleanly on next page load.
+}
+
+/** (8) Link a Google account to the current (e.g. email) user. */
+export async function linkGoogle() {
+  await ensureReady();
+  const u = currentUser();
+  if (!u) throw new Error(NO_CURRENT_USER);
+  const provider = new _sdk.GoogleAuthProvider();
+  await _sdk.linkWithPopup(u, provider);
+}
+
+/** (8) Link an email/password credential to the current (e.g. Google) user. */
+export async function linkEmailPassword(email, password) {
+  await ensureReady();
+  const u = currentUser();
+  if (!u) throw new Error(NO_CURRENT_USER);
+  const cred = _sdk.EmailAuthProvider.credential(email, password);
+  await _sdk.linkWithCredential(u, cred);
+}
+
+/** (8) Unlink a provider by id (e.g. 'google.com'). Refuses to remove the last one. */
+export async function unlinkProvider(providerId) {
+  await ensureReady();
+  const u = currentUser();
+  if (!u) throw new Error(NO_CURRENT_USER);
+  if (linkedProviders().length <= 1) {
+    const e = new Error('Cannot remove your only sign-in method.');
+    e.code = 'isatprep/last-provider';
+    throw e;
+  }
+  await _sdk.unlink(u, providerId);
 }

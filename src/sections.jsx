@@ -105,6 +105,9 @@ function AccountControl() {
       </button>
       {open && (
         <div className="acct-menu" role="menu" aria-label="Account">
+          <a href="account.html" role="menuitem" className="acct-item">
+            Account &amp; settings
+          </a>
           <button type="button" role="menuitem" className="acct-item" onClick={onSignOut}>
             Sign out
           </button>

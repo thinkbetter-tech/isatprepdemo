@@ -126,8 +126,8 @@ section{padding:var(--pad-y) 0;}
   display:flex; flex-direction:column;
 }
 .acct-item{
-  text-align:left; background:transparent; border:0; cursor:pointer;
-  font:inherit; font-size:14px; color:var(--ink); padding:9px 12px; border-radius:7px;
+  display:block; width:100%; text-align:left; background:transparent; border:0; cursor:pointer;
+  font:inherit; font-size:14px; color:var(--ink); padding:9px 12px; border-radius:7px; text-decoration:none;
 }
 .acct-item:hover{background:var(--bg-2);}
 .acct-item-danger{color:#B91C1C;}
@@ -144,6 +144,39 @@ section{padding:var(--pad-y) 0;}
 .acct-dialog p{margin:0 0 14px; color:var(--ink-soft); font-size:15px; line-height:1.6;}
 .acct-err{color:#B91C1C !important; font-size:14px;}
 .acct-dialog-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:18px;}
+
+/* Account / Settings page */
+.acct-page{padding:48px 32px 96px; max-width:var(--maxw); margin:0 auto;}
+.acct-page > h1{margin-bottom:28px;}
+.acct-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px; align-items:start;}
+.acct-section{
+  background:#fff; border:1px solid var(--rule); border-radius:14px;
+  padding:24px 26px; box-shadow:0 1px 2px rgba(21,38,71,0.04);
+}
+.acct-section h2{font-size:20px; margin:0 0 14px; color:var(--navy); font-weight:500;}
+.acct-form{display:flex; flex-direction:column; gap:14px; align-items:flex-start;}
+.acct-form .field{width:100%;}
+.acct-section .field label{display:block; font-size:13px; font-weight:600; color:var(--ink); margin-bottom:5px;}
+.acct-section .field input{
+  width:100%; padding:10px 12px; border:1px solid var(--rule); border-radius:8px;
+  font:inherit; font-size:15px; background:var(--bg);
+}
+.acct-section .field input:disabled{color:var(--muted); background:var(--bg-2);}
+.acct-section .hint{font-size:13px; color:var(--muted); font-weight:400; margin-top:4px;}
+.acct-status{font-size:13px; margin:4px 0 0;}
+.acct-status.ok{color:#15803D;}
+.acct-status.err{color:#B91C1C;}
+.acct-plan{display:flex; align-items:center; justify-content:space-between; gap:16px;}
+.acct-plan-name{font-size:18px; font-weight:700; color:var(--navy);}
+.acct-toggle-row{display:flex; gap:10px; align-items:flex-start; margin-bottom:12px; font-size:15px; cursor:pointer;}
+.acct-toggle-row input{margin-top:3px;}
+.acct-progress{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px;}
+.acct-progress li{display:flex; justify-content:space-between; gap:12px; padding-bottom:10px; border-bottom:1px solid var(--rule);}
+.acct-progress li:last-child{border-bottom:0; padding-bottom:0;}
+.acct-progress-name{font-weight:600; color:var(--ink); text-transform:capitalize;}
+.acct-conn{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--rule);}
+.acct-conn:last-of-type{border-bottom:0;}
+
 .btn-block{width:100%; justify-content:center;}
 .btn-arrow{display:inline-block; transition:transform .15s ease;}
 .btn:hover .btn-arrow{transform:translateX(3px);}
