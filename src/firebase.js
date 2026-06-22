@@ -111,10 +111,15 @@ export function getFirebase() {
       browserSessionPersistence: authMod.browserSessionPersistence,
       updateProfile: authMod.updateProfile,
       signOut: authMod.signOut,
+      deleteUser: authMod.deleteUser,
+      reauthenticateWithPopup: authMod.reauthenticateWithPopup,
       // firestore
       doc: fsMod.doc,
       getDoc: fsMod.getDoc,
       setDoc: fsMod.setDoc,
+      deleteDoc: fsMod.deleteDoc,
+      collection: fsMod.collection,
+      getDocs: fsMod.getDocs,
       serverTimestamp: fsMod.serverTimestamp,
     };
 
@@ -266,6 +271,68 @@ export async function sendReset(email) {
 export async function signOutUser() {
   await ensureReady();
   await _sdk.signOut(auth);
+}
+
+/** Error code thrown by deleteAccount when there is no signed-in user. */
+export const NO_CURRENT_USER = 'isatprep/no-current-user';
+
+/**
+ * Permanently deletes the signed-in user's account and personal data.
+ *
+ * Order matters: purge Firestore documents FIRST (while the user is still
+ * authenticated, so security rules permit own-data writes), THEN delete the
+ * Auth user. We remove:
+ *   - progress/{uid}/lessons/*  (subcollection docs)
+ *   - users/{uid}               (profile)
+ *
+ * Firebase requires a RECENT login to delete an Auth user. If the credential
+ * is stale it throws `auth/requires-recent-login`; we transparently
+ * re-authenticate via the Google popup when that provider is available, then
+ * retry. (Email/password users who hit this are asked to re-login — surfaced
+ * to the caller as `auth/requires-recent-login`.)
+ *
+ * This is the user/parent-facing data-deletion path required for US privacy
+ * compliance (CCPA/state laws; minors). It is irreversible.
+ */
+export async function deleteAccount() {
+  await ensureReady();
+  const user = auth && auth.currentUser;
+  if (!user) throw new Error(NO_CURRENT_USER);
+  const uid = user.uid;
+
+  // 1) Delete Firestore data while still authenticated.
+  // Best-effort on the progress subcollection (may be empty).
+  try {
+    const lessons = _sdk.collection(db, 'progress', uid, 'lessons');
+    const snap = await _sdk.getDocs(lessons);
+    await Promise.all(snap.docs.map((d) => _sdk.deleteDoc(d.ref)));
+  } catch {
+    /* no progress data, or rules deny — proceed to profile + auth deletion */
+  }
+  try {
+    await _sdk.deleteDoc(_sdk.doc(db, 'users', uid));
+  } catch {
+    /* profile may not exist; continue to auth deletion */
+  }
+
+  // 2) Delete the Auth user, re-authenticating if the credential is stale.
+  try {
+    await _sdk.deleteUser(user);
+  } catch (e) {
+    if (e && e.code === 'auth/requires-recent-login') {
+      const providers = (user.providerData || []).map((p) => p && p.providerId);
+      if (providers.includes('google.com')) {
+        const provider = new _sdk.GoogleAuthProvider();
+        await _sdk.reauthenticateWithPopup(user, provider);
+        await _sdk.deleteUser(user);
+      } else {
+        // Password user: caller must prompt a fresh login, then retry.
+        throw e;
+      }
+    } else {
+      throw e;
+    }
+  }
 }
 
 /**

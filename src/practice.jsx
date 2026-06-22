@@ -1,7 +1,10 @@
 import React from 'react';
 import { Footer } from './sections.jsx';
 import { DemoBanner, PreviewNav } from './preview.jsx';
-import { trackEvent } from './firebase.js';
+import {
+  trackEvent, onUserChanged, signOutUser, deleteAccount,
+  isFirebaseConfigured,
+} from './firebase.js';
 // Practice page for "Craft and Structure" — 4 unlocked questions + 96 locked.
 
 // Module-scoped guard: fire `practice_start` ONCE per page session, the first
@@ -98,6 +101,97 @@ const QUESTIONS = [
 
 // ============================================================
 
+// Account control: shows the signed-in user's email, sign-out, and the
+// account/data deletion path (US privacy compliance). Renders nothing when
+// Firebase is unconfigured (local/no-env) or no user is signed in.
+function AccountControl() {
+  const [user, setUser] = React.useState(null);
+  const [open, setOpen] = React.useState(false);
+  const [confirming, setConfirming] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!isFirebaseConfigured()) return undefined;
+    const unsub = onUserChanged((u) => setUser(u));
+    return () => unsub();
+  }, []);
+
+  if (!user) return null;
+
+  const onSignOut = async () => {
+    try { await signOutUser(); window.location.href = 'index.html'; }
+    catch { /* ignore */ }
+  };
+
+  const onDelete = async () => {
+    setBusy(true); setErr(null);
+    try {
+      await deleteAccount();
+      window.location.href = 'index.html';
+    } catch (e) {
+      setBusy(false);
+      if (e && e.code === 'auth/requires-recent-login') {
+        setErr('For your security, please log in again, then retry deletion.');
+      } else if (e && e.code === 'auth/popup-closed-by-user') {
+        setErr('Re-authentication was cancelled. Account not deleted.');
+      } else {
+        setErr('Could not delete the account. Please try again or contact hello@isatprep.net.');
+      }
+    }
+  };
+
+  return (
+    <div className="acct">
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm acct-toggle"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {user.displayName || user.email || 'Account'} ▾
+      </button>
+      {open && (
+        <div className="acct-menu" role="menu" aria-label="Account">
+          <button type="button" role="menuitem" className="acct-item" onClick={onSignOut}>
+            Sign out
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="acct-item acct-item-danger"
+            onClick={() => setConfirming(true)}
+          >
+            Delete account
+          </button>
+        </div>
+      )}
+
+      {confirming && (
+        <div className="acct-backdrop" role="dialog" aria-modal="true" aria-labelledby="del-title" onClick={() => !busy && setConfirming(false)}>
+          <div className="acct-dialog" onClick={(e) => e.stopPropagation()}>
+            <h2 id="del-title" className="serif">Delete your account?</h2>
+            <p>
+              This permanently deletes your account and all associated data
+              (profile and saved progress). This cannot be undone.
+            </p>
+            {err && <p className="acct-err" role="alert">{err}</p>}
+            <div className="acct-dialog-actions">
+              <button type="button" className="btn btn-outline" disabled={busy} onClick={() => setConfirming(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" disabled={busy} onClick={onDelete}>
+                {busy ? 'Deleting…' : 'Delete permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PracticeNav() {
   return (
     <nav className="nav">
@@ -112,6 +206,7 @@ function PracticeNav() {
           <a href="index.html#faq">FAQ</a>
         </div>
         <div className="nav-cta">
+          <AccountControl />
           <a href="index.html" className="btn btn-ghost btn-sm">← Back to home</a>
           <a href="index.html#pricing" className="btn btn-primary btn-sm">Upgrade</a>
         </div>
