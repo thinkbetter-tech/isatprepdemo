@@ -15,6 +15,16 @@ import craftAndStructure2 from './questions-craft-and-structure-2.js';
 import informationAndIdeas2 from './questions-information-and-ideas-2.js';
 import expressionOfIdeas2 from './questions-expression-of-ideas-2.js';
 import standardEnglishConventions2 from './questions-standard-english-conventions-2.js';
+// Batch 3 (ids …-061..080)
+import craftAndStructure3 from './questions-craft-and-structure-3.js';
+import informationAndIdeas3 from './questions-information-and-ideas-3.js';
+import expressionOfIdeas3 from './questions-expression-of-ideas-3.js';
+import standardEnglishConventions3 from './questions-standard-english-conventions-3.js';
+// Batch 4 (ids …-081..100)
+import craftAndStructure4 from './questions-craft-and-structure-4.js';
+import informationAndIdeas4 from './questions-information-and-ideas-4.js';
+import expressionOfIdeas4 from './questions-expression-of-ideas-4.js';
+import standardEnglishConventions4 from './questions-standard-english-conventions-4.js';
 
 // The original 4 questions that shipped in practice.jsx, normalized to the schema
 // (domain craft-and-structure; kept as the free-practice samples).
@@ -105,10 +115,10 @@ export const ORIGINAL_QUESTIONS = [
 // Full bank: generated questions per domain + the original samples.
 export const QUESTIONS = [
   ...ORIGINAL_QUESTIONS,
-  ...craftAndStructure, ...craftAndStructure2,
-  ...informationAndIdeas, ...informationAndIdeas2,
-  ...expressionOfIdeas, ...expressionOfIdeas2,
-  ...standardEnglishConventions, ...standardEnglishConventions2,
+  ...craftAndStructure, ...craftAndStructure2, ...craftAndStructure3, ...craftAndStructure4,
+  ...informationAndIdeas, ...informationAndIdeas2, ...informationAndIdeas3, ...informationAndIdeas4,
+  ...expressionOfIdeas, ...expressionOfIdeas2, ...expressionOfIdeas3, ...expressionOfIdeas4,
+  ...standardEnglishConventions, ...standardEnglishConventions2, ...standardEnglishConventions3, ...standardEnglishConventions4,
 ];
 
 export function questionsByDomain(slug) {
