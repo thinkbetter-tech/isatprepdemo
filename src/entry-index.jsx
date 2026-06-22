@@ -102,7 +102,7 @@ function App() {
       <Pricing />
       <FAQ />
       <FinalCTA />
-      <Footer />
+      <Footer onIndex={true} />
 
       <VideoModal open={demoOpen} onClose={() => setDemoOpen(false)} url={DEMO_VIDEO_URL} />
 

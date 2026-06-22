@@ -16,19 +16,13 @@ function TestCard({ test, allowed, attempts }) {
   const resolving = allowed === null;
   const locked = allowed === false;
   const taken = attempts && attempts.length > 0;
-  // Glanceable status: best score across attempts (scaled if available, else raw %).
-  let statusLabel = null;
-  if (taken) {
-    const scaled = attempts.map((a) => a.score && a.score.scaledEstimate).filter((n) => typeof n === 'number');
-    if (scaled.length) statusLabel = `Taken · best ${Math.max(...scaled)}`;
-    else statusLabel = `Taken ${attempts.length}×`;
-  }
+  const n = taken ? attempts.length : 0;
   return (
     <div className={'tl-card' + (locked ? ' locked' : '')}>
       <div className="tl-card-top">
         <span className="tl-kind mono">{test.kind === 'full' ? 'Full R&W' : 'Mini'}</span>
         {taken
-          ? <span className="tl-status" title={`${attempts.length} attempt${attempts.length > 1 ? 's' : ''}`}>✓ {statusLabel}</span>
+          ? <span className="tl-status">{n} attempt{n > 1 ? 's' : ''}</span>
           : (locked && <span className="tl-lock" aria-label="Locked">🔒</span>)}
       </div>
       <h3>{test.title}</h3>
@@ -41,41 +35,20 @@ function TestCard({ test, allowed, attempts }) {
       </ul>
       {resolving ? (
         <a className="btn btn-outline btn-sm" aria-hidden="true" style={{ visibility: 'hidden' }}>…</a>
-      ) : allowed ? (
-        <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-primary btn-sm">
-          {attempts && attempts.length ? 'Retake test' : 'Start test'} <span className="btn-arrow">→</span>
-        </a>
-      ) : (
+      ) : !allowed ? (
         <a href="index.html#pricing" className="btn btn-outline btn-sm">Upgrade to unlock</a>
-      )}
-
-      {/* Entry point to past results for this test. */}
-      {attempts && attempts.length > 0 && (
-        <div className="tl-attempts">
-          <div className="tl-attempts-head">
-            Your results <span className="hint">({attempts.length})</span>
-          </div>
-          <ul>
-            {attempts.slice(0, 3).map((at) => {
-              const sc = at.score || {};
-              const date = at.startedAt ? new Date(at.startedAt).toLocaleDateString() : '';
-              return (
-                <li key={at.id}>
-                  <a href={`test.html?attempt=${encodeURIComponent(at.id)}`}>
-                    <span className="tl-attempt-score">
-                      {sc.scaledEstimate != null ? sc.scaledEstimate : (sc.total ? `${sc.correct}/${sc.total}` : 'View')}
-                    </span>
-                    <span className="tl-attempt-date">{date}</span>
-                    <span className="tl-attempt-go">View analysis →</span>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-          {attempts.length > 3 && (
-            <a className="tl-attempts-more" href="account.html">See all in history →</a>
-          )}
+      ) : taken ? (
+        // Two side-by-side CTAs once the test has been attempted. "View result"
+        // opens the LATEST attempt; the analysis page has a dropdown to switch
+        // between attempts.
+        <div className="tl-cta-row">
+          <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-outline btn-sm">Retake test</a>
+          <a href={`test.html?attempt=${encodeURIComponent(attempts[0].id)}`} className="btn btn-primary btn-sm">View result</a>
         </div>
+      ) : (
+        <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-primary btn-sm">
+          Start test <span className="btn-arrow">→</span>
+        </a>
       )}
     </div>
   );

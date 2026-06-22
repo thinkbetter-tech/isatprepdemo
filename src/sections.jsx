@@ -629,7 +629,16 @@ function FinalCTA() {
   );
 }
 
-function Footer() {
+// Footer adapts to the visitor, mirroring the nav:
+//  - Pricing link hidden for PAID users (nothing to buy).
+//  - Account column: signed-out → Log in / Sign up; signed-in → My practice /
+//    Mock Tests / Account.
+//  - Section anchors resolve to index.html#… when not on the home page.
+function Footer({ onIndex = false } = {}) {
+  const auth = useAuthPlan();
+  const home = (anchor) => (onIndex ? `#${anchor}` : `index.html#${anchor}`);
+  const isPaid = auth.status === 'in' && auth.paid;
+  const isIn = auth.status === 'in';
   return (
     <footer>
       <div className="wrap">
@@ -645,16 +654,27 @@ function Footer() {
           </div>
           <div>
             <h4>Explore</h4>
-            <a href="#top">Home</a>
-            <a href="#instructor">About</a>
-            <a href="#method">Method</a>
-            <a href="#pricing">Pricing</a>
+            <a href={onIndex ? '#top' : 'index.html'}>Home</a>
+            <a href={home('instructor')}>About</a>
+            <a href={home('method')}>Method</a>
+            <a href="topics.html">Topics</a>
+            <a href="tests.html">Mock Tests</a>
+            {!isPaid && <a href={home('pricing')}>Pricing</a>}
           </div>
           <div>
             <h4>Account</h4>
-            <a href="login.html">Log in</a>
-            <a href="signup.html">Sign up</a>
-            <a href="#faq">FAQ</a>
+            {isIn ? (
+              <>
+                <a href="practice.html">My practice</a>
+                <a href="account.html">Account &amp; settings</a>
+              </>
+            ) : (
+              <>
+                <a href="login.html">Log in</a>
+                <a href="signup.html">Sign up</a>
+              </>
+            )}
+            <a href={home('faq')}>FAQ</a>
           </div>
           <div>
             <h4>Contact</h4>

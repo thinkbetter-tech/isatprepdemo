@@ -9,7 +9,7 @@ import {
 import { analyzeAttempt, domainName, skillName, fmtDuration } from './data/analysisEngine.js';
 import {
   onUserChanged, isFirebaseConfigured, getUserDoc, saveLessonProgress, saveAttempt,
-  getPeerComparison, PEER_MIN_ATTEMPTS,
+  getPeerComparison, PEER_MIN_ATTEMPTS, getAttempt, listAttempts,
 } from './firebase.js';
 
 // Bluebook-style adaptive exam runner. Phases:
@@ -382,7 +382,7 @@ function Timeline({ timeline }) {
 
 // The full post-test analysis report. Driven entirely by the attempt record +
 // (optional) peer data — no hardcoded values; empty inputs render gracefully.
-function Analysis({ attempt, peer, backHref = 'tests.html' }) {
+function Analysis({ attempt, peer, backHref = 'tests.html', switcher = null }) {
   const a = React.useMemo(() => analyzeAttempt(attempt), [attempt]);
   const [tab, setTab] = React.useState('wrong'); // wrong is most actionable
   const s = a.snapshot;
@@ -395,7 +395,10 @@ function Analysis({ attempt, peer, backHref = 'tests.html' }) {
   return (
     <div className="tq-results wrap">
       <span className="tq-eyebrow mono">Your analysis</span>
-      <h1 className="serif">{attempt.testTitle || 'Test results'}</h1>
+      <div className="tq-analysis-head">
+        <h1 className="serif">{attempt.testTitle || 'Test results'}</h1>
+        {switcher}
+      </div>
 
       {/* ---- A. Quick snapshot ---- */}
       <div className="tq-score-row">
@@ -507,16 +510,20 @@ function Analysis({ attempt, peer, backHref = 'tests.html' }) {
       </div>
 
       <div className="tq-results-actions">
-        <a href={backHref} className="btn btn-primary">Back to tests</a>
-        <a href="account.html" className="btn btn-outline">My test history</a>
+        <a href="tests.html" className="btn btn-primary">Back to tests</a>
       </div>
     </div>
   );
 }
 
 // ---- Standalone viewer for a PAST attempt (test.html?attempt=<id>) ----
+// Loads the requested attempt AND its siblings (same test) so the user can
+// switch between attempts via a dropdown on the analysis page. Defaults to the
+// latest when no specific id resolves.
 function PastAttemptView({ attemptId }) {
   const [state, setState] = React.useState('loading'); // loading|notfound|ready
+  const [siblings, setSiblings] = React.useState([]);   // all attempts of this test, newest first
+  const [currentId, setCurrentId] = React.useState(attemptId);
   const [attempt, setAttempt] = React.useState(null);
   const [peer, setPeer] = React.useState(null);
 
@@ -525,19 +532,51 @@ function PastAttemptView({ attemptId }) {
     if (!isFirebaseConfigured()) { setState('notfound'); return undefined; }
     const unsub = onUserChanged(async (u) => {
       if (!u) { window.location.href = 'login.html'; return; }
-      const { getAttempt } = await import('./firebase.js');
       const a = await getAttempt(attemptId);
       if (!alive) return;
       if (!a) { setState('notfound'); return; }
-      setAttempt(a); setState('ready');
+      setAttempt(a); setCurrentId(a.id); setState('ready');
       getPeerComparison(a.testId, a).then((p) => { if (alive) setPeer(p); }).catch(() => {});
+      // Load siblings for the switcher (best-effort).
+      try {
+        const all = await listAttempts(100);
+        if (alive) setSiblings(all.filter((x) => x.testId === a.testId));
+      } catch { /* dropdown just won't show */ }
     });
     return () => { alive = false; unsub(); };
   }, [attemptId]);
 
+  // Switch to another attempt of the same test without a full reload; keep the
+  // URL in sync so it's bookmarkable/shareable.
+  const switchTo = async (id) => {
+    if (!id || id === currentId) return;
+    setPeer(null);
+    const a = await getAttempt(id);
+    if (!a) return;
+    setAttempt(a); setCurrentId(id);
+    try { window.history.replaceState(null, '', `test.html?attempt=${encodeURIComponent(id)}`); } catch { /* ignore */ }
+    getPeerComparison(a.testId, a).then(setPeer).catch(() => {});
+  };
+
   if (state === 'loading') return <div className="tq-center"><div className="tq-card"><p className="hint">Loading…</p></div></div>;
   if (state === 'notfound') return <div className="tq-center"><div className="tq-card"><h1 className="serif">Attempt not found</h1><a className="btn btn-primary" href="account.html">My test history</a></div></div>;
-  return <><Analysis attempt={attempt} peer={peer} backHref="account.html" /><Footer /></>;
+
+  // Build the dropdown only when there's more than one attempt of this test.
+  const switcher = siblings.length > 1 ? (
+    <label className="tq-attempt-switch">
+      <span>Attempt</span>
+      <select value={currentId} onChange={(e) => switchTo(e.target.value)}>
+        {siblings.map((s, i) => {
+          const n = siblings.length - i; // newest = highest number
+          const date = s.startedAt ? new Date(s.startedAt).toLocaleDateString() : '';
+          const sc = s.score && s.score.scaledEstimate != null ? ` · ${s.score.scaledEstimate}` : '';
+          return <option key={s.id} value={s.id}>#{n} — {date}{sc}{i === 0 ? ' (latest)' : ''}</option>;
+        })}
+      </select>
+    </label>
+  ) : null;
+
+  return <><Analysis attempt={attempt} peer={peer} backHref="account.html" switcher={switcher} /><Footer /></>;
 }
 
 // Thin dispatcher: history/deep-link mode (?attempt=) vs. live test runner.

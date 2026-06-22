@@ -189,3 +189,11 @@
 
 /* "Taken / best score" status chip on a Mock Test card */
 .tl-status{display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:#F0FDF4; color:#166534; border:1px solid #bbf7d0;}
+
+/* Two-CTA row on a taken Mock Test card */
+.tl-cta-row{display:flex; gap:8px; flex-wrap:wrap;}
+
+/* Attempt switcher on the analysis page */
+.tq-analysis-head{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+.tq-attempt-switch{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft);}
+.tq-attempt-switch select{font:inherit; font-size:14px; padding:7px 10px; border:1px solid var(--rule); border-radius:8px; background:#fff; color:var(--ink);}
