@@ -175,19 +175,7 @@
 .tq-hist-title{font-weight:600; color:var(--navy);}
 .tq-hist-meta{font-size:13px; color:var(--muted);}
 
-/* Past-attempts entry point on each Mock Test card */
-.tl-attempts{margin-top:14px; padding-top:12px; border-top:1px solid var(--rule);}
-.tl-attempts-head{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); margin-bottom:8px;}
-.tl-attempts ul{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px;}
-.tl-attempts li a{display:flex; align-items:center; gap:10px; text-decoration:none; padding:7px 10px; border-radius:7px; background:var(--bg-2); border:1px solid var(--rule);}
-.tl-attempts li a:hover{border-color:var(--navy);}
-.tl-attempt-score{font-weight:700; color:var(--navy); font-size:14px; min-width:46px;}
-.tl-attempt-date{font-size:12px; color:var(--muted);}
-.tl-attempt-go{margin-left:auto; font-size:12px; color:var(--amber-deep);}
-.tl-attempts-more{display:inline-block; margin-top:8px; font-size:13px; color:var(--ink-soft); text-decoration:none;}
-.tl-attempts-more:hover{color:var(--navy);}
-
-/* "Taken / best score" status chip on a Mock Test card */
+/* Attempt-count status chip on a Mock Test card */
 .tl-status{display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:#F0FDF4; color:#166534; border:1px solid #bbf7d0;}
 
 /* Two-CTA row on a taken Mock Test card */

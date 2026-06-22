@@ -10,10 +10,12 @@ import { onUserChanged, isFirebaseConfigured, getUserDoc, listAttempts } from '.
 // `allowed` may be null while the plan is still resolving — render a neutral
 // placeholder CTA then (no lock, no start) to avoid the locked→unlocked flicker.
 // `attempts` = this user's past attempts of THIS test (newest first), or [].
-function TestCard({ test, allowed, attempts }) {
+function TestCard({ test, allowed, attempts, attemptsLoaded = true }) {
   const total = test.modules.reduce((n, m) => n + m.count, 0);
   const minutes = test.modules.reduce((n, m) => n + m.minutes, 0);
-  const resolving = allowed === null;
+  // Resolving until BOTH plan and attempt-history are known, so the CTA never
+  // flashes "Start test" then flips to "Retake / View analysis".
+  const resolving = allowed === null || !attemptsLoaded;
   const locked = allowed === false;
   const taken = attempts && attempts.length > 0;
   const n = taken ? attempts.length : 0;
@@ -42,8 +44,8 @@ function TestCard({ test, allowed, attempts }) {
         // opens the LATEST attempt; the analysis page has a dropdown to switch
         // between attempts.
         <div className="tl-cta-row">
-          <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-outline btn-sm">Retake test</a>
-          <a href={`test.html?attempt=${encodeURIComponent(attempts[0].id)}`} className="btn btn-primary btn-sm">View result</a>
+          <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-primary btn-sm">Retake test <span className="btn-arrow">→</span></a>
+          <a href={`test.html?attempt=${encodeURIComponent(attempts[0].id)}`} className="btn btn-outline btn-sm">View analysis</a>
         </div>
       ) : (
         <a href={`test.html?id=${encodeURIComponent(test.id)}`} className="btn btn-primary btn-sm">
@@ -62,13 +64,16 @@ function TestsApp() {
     return cachedPlan(); // 'core'/'complete'/'free' or null
   });
 
-  // Past attempts grouped by testId (newest first). {} = none/loading.
+  // Past attempts grouped by testId (newest first). `attemptsLoaded` gates the
+  // CTA so we don't flash "Start test" before history loads (then flip to
+  // Retake/View). Signed-out users have no attempts → loaded immediately.
   const [attemptsByTest, setAttemptsByTest] = React.useState({});
+  const [attemptsLoaded, setAttemptsLoaded] = React.useState(!isFirebaseConfigured());
 
   React.useEffect(() => {
     if (!isFirebaseConfigured()) return undefined;
     const unsub = onUserChanged(async (u) => {
-      if (!u) { setPlan('free'); setCachedPlan(null); setAttemptsByTest({}); return; }
+      if (!u) { setPlan('free'); setCachedPlan(null); setAttemptsByTest({}); setAttemptsLoaded(true); return; }
       const doc = await getUserDoc();
       const p = (doc && doc.plan) || 'free';
       setPlan(p); setCachedPlan(p);
@@ -83,6 +88,7 @@ function TestsApp() {
         // listAttempts already returns newest-first; preserve that per group.
         setAttemptsByTest(grouped);
       } catch { /* leave empty */ }
+      finally { setAttemptsLoaded(true); }
     });
     return () => unsub();
   }, []);
@@ -114,14 +120,14 @@ function TestsApp() {
         <section className="tl-section">
           <h2 className="serif">Full Reading &amp; Writing tests</h2>
           <div className="tl-grid">
-            {full.map((t) => <TestCard key={t.id} test={t} allowed={isAllowed(t)} attempts={attemptsByTest[t.id]} />)}
+            {full.map((t) => <TestCard key={t.id} test={t} allowed={isAllowed(t)} attempts={attemptsByTest[t.id]} attemptsLoaded={attemptsLoaded} />)}
           </div>
         </section>
 
         <section className="tl-section">
           <h2 className="serif">Domain mini-tests</h2>
           <div className="tl-grid">
-            {mini.map((t) => <TestCard key={t.id} test={t} allowed={isAllowed(t)} attempts={attemptsByTest[t.id]} />)}
+            {mini.map((t) => <TestCard key={t.id} test={t} allowed={isAllowed(t)} attempts={attemptsByTest[t.id]} attemptsLoaded={attemptsLoaded} />)}
           </div>
         </section>
       </main>
