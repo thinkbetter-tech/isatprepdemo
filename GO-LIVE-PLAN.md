@@ -479,3 +479,94 @@ Replace the `href="#"` placeholders in `auth.jsx`. The policy must cover:
 - **Stage 2 (with payments/video):** Stripe Checkout (SAQ-A); update Privacy Policy with Stripe +
   video provider as sub-processors; confirm video provider's US data handling + DPA; App Check;
   audit logging on entitlement changes.
+
+---
+
+## 12. ACTUAL BUILD LOG — what shipped since this plan was written
+
+This section is the source of truth for what is **live on `isatprep.net`** today. The plan above
+was the intent; this is the reality, including features added beyond the original Stage 1/2 scope.
+
+### 12.1 Infrastructure & hosting (LIVE)
+- **Project `isatprep-prod`** (#850089153551) created; billing linked (`014CD4-D91E29-9756AB`) via a
+  cross-grant between `ninkesh@` (project owner) and `ravish@` (billing/org-policy rights).
+- **Firestore** in **`nam5`** (US multi-region — permanent). Rules deployed: own-data-only;
+  `plan`/`entitlements`/`admin` are server-only (client writes blocked).
+- **Org-policy override (Option 1)** applied to `isatprep-prod` only (allows public endpoints later;
+  rest of org stays strict).
+- **Billing budget** with 50/90/100% alerts → `ninkesh@padhai247.com`.
+- **Custom domain `isatprep.net` + `www`** cutover from GitHub Pages → Firebase Hosting (GoDaddy DNS:
+  A `199.36.158.100`, TXT `hosting-site=isatprep-prod`, `www` CNAME). SSL **CERT_ACTIVE**. GitHub
+  Pages deleted; `CNAME` file removed.
+- **`isatprep-staging`** project (#713262187176) — full prod mirror (billing, APIs, Firestore nam5,
+  web app, rules). `.firebaserc` has `default`/`prod`/`staging` aliases.
+- **CI/CD**: keyless WIF (pool `github-pool`, provider `github-provider`, SA
+  `gh-deployer@isatprep-prod`), repo `thinkbetter-tech/isatprepdemo`. `.github/workflows/deploy.yml`
+  auto-builds + deploys hosting on push to `main`. Repo vars/secrets set.
+
+### 12.2 Frontend build (LIVE)
+- **Vite multipage build** replaced in-browser Babel. Entries: index, login, signup, topics,
+  practice, account, tests, test, preview-dashboard, preview-module, index-print, privacy, terms.
+- `*.jsx` moved to `src/`; Firebase SDK lazy-loaded/code-split.
+
+### 12.3 Auth, account, compliance (LIVE)
+- **Real Firebase Auth**: Google + email/password + password reset. `whenAuthReady()` guard avoids
+  pre-hydration redirect races. `redirectIfSignedIn()` keeps signed-in users off login/signup pages.
+- **13+ age gate** (DOB on email signup; 13+ modal on first Google sign-in).
+- **`users/{uid}` profile** created on signup (`plan:'free'`, `ageConfirmed`).
+- **Account/Settings page** (`account.html`) — profile name, plan status, change password (or set via
+  email for Google-only), export-my-data (JSON), email prefs, progress dashboard, consent prefs,
+  connected sign-in methods (link/unlink Google + email).
+- **Data-deletion path** — `deleteAccount()` purges `progress/{uid}/**` + `users/{uid}` + Auth user
+  (re-auths on requires-recent-login). Reachable from the account dropdown everywhere.
+- **GA4** (`G-RGN236SXVF`) behind a **consent banner + GPC**; events: login, sign_up, demo_video_open,
+  practice_start, practice_answer_submit, select_plan.
+- **Firebase App Check** — reCAPTCHA v3 wired; client **sends tokens** (site key set);
+  **enforcement NOT yet enabled** (deliberate — verify token flow first, then enforce Auth+Firestore).
+- Legal pages live (privacy/terms) with `[INSERT ...]` placeholders + attorney review still pending.
+
+### 12.4 Navigation & personas (LIVE)
+- **One shared `SiteNav`** (replaced 5 divergent navs), driven by `useAuthPlan()` (status
+  loading/out/in + paid). Plan cached in localStorage to avoid badge/CTA flicker.
+- **Persona-correct UX** (see `docs/PERSONA-AUDIT.md`): logged-out → Start free; logged-in → Go to
+  practice; **paid → no Pricing/Upgrade anywhere**, plan badge ("Method"/"Mastery") shown in nav +
+  account dropdown.
+- Nav layout stabilized (`scrollbar-gutter: stable`, reserved CTA width).
+
+### 12.5 Tiers (renamed)
+- Display names: **Free / Method ($59) / Mastery ($79)**. Internal plan ids unchanged
+  (`free`/`core`/`complete`) so data/gating are stable. "Method" = pick any 2 modules; "Mastery" = all.
+
+### 12.6 Question bank (LIVE)
+- **404 questions**, 100 per SAT R&W domain (+4 originals), `src/data/questions-<domain>(-N).js`,
+  aggregated in `src/data/questions.js`. Each tagged `domain/skill/difficulty/source:"ai-draft"`.
+- Difficulty mix ~32% easy / 41% medium / 27% hard (mirrors SAT design; drives adaptivity).
+- **All 4 topics practiceable**: `practice.html?topic=<slug>` shows a 4-question free sample to
+  non-paid users and the full ~100 to paid users (gated by `plan`). Replaces the old decorative
+  "locked questions" placeholders.
+- ⚠️ **AI-drafted, not yet expert-reviewed** — taken live by explicit decision; `source` tag lets a
+  reviewer filter/replace without touching the engine.
+
+### 12.7 Adaptive Mock Tests (LIVE) — NOT in the original plan, added in Stage 2 work
+- **`src/data/testEngine.js`** (pure logic): `assembleTest`, `assembleModule`, `scoreModule`,
+  `chooseModule2Path` (adaptive routing ≥60% → harder pool), `assembleAdaptiveModule2`,
+  `estimateScaledScore` (labeled estimate, NOT College Board scaling), `domainBreakdown`.
+- **`src/data/tests.js`** — catalog: **4 domain mini-tests** (15 Q, 20 min, single module) + **3 full
+  adaptive R&W tests** (2 modules × 27 Q × 32 min, 10-min break, adaptive). `requiredPlan: core`.
+- **`tests.html`** (catalog, plan-gated, upgrade nudge) + **`test.html`** (full-screen Bluebook-style
+  runner): pre-test guidelines, per-module countdown w/ auto-submit, one-question view,
+  mark-for-review, answer eliminator, question navigator, module review, 10-min break, adaptive
+  Module 2, results + per-question review.
+- Nav label: **"Mock Tests"** (the standalone "Practice" tab was removed; practice lives in Topics).
+- ⚠️ **Persistence gap (known):** the runner currently saves only a summary
+  (`progress/{uid}/lessons/test:<id>`: correct/total/scaled/path/finishedAt) and **overwrites** it;
+  there is **no per-question timing, no per-question answer history, and no multi-attempt history**.
+  The post-test analysis feature (§13 / `docs/POST-TEST-ANALYSIS-PLAN.md`) depends on fixing this.
+
+### 12.8 Still pending for full go-live (unchanged priorities)
+- **Payments / Stripe checkout** — no real purchase flow yet; plans set only via admin. (Biggest gap.)
+- **App Check enforcement** — toggle ON after verifying token flow.
+- **Legal placeholders** + attorney review.
+- **Expert review of AI-drafted questions.**
+- **Video** — decided to reuse **YouTube embeds** (no self-hosted pipeline); Phase 2C effectively
+  dropped. Load-testing downgraded to optional since YouTube serves video.
