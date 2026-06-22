@@ -47,7 +47,8 @@ function SkipLink() {
 // unconfigured (NavCta decides what to show in that case).
 function AccountControl() {
   const [user, setUser] = React.useState(null);
-  const [plan, setPlan] = React.useState('free');
+  // Seed from the cached plan so the badge renders correctly on first paint.
+  const [plan, setPlan] = React.useState(() => cachedPlan() || 'free');
   const [open, setOpen] = React.useState(false);
   const [confirming, setConfirming] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -58,10 +59,10 @@ function AccountControl() {
     const unsub = onUserChanged(async (u) => {
       setUser(u);
       if (u) {
-        try { const doc = await getUserDoc(); setPlan((doc && doc.plan) || 'free'); }
+        try { const doc = await getUserDoc(); const p = (doc && doc.plan) || 'free'; setPlan(p); setCachedPlan(p); }
         catch { setPlan('free'); }
       } else {
-        setPlan('free');
+        setPlan('free'); setCachedPlan(null);
       }
     });
     return () => unsub();
@@ -163,27 +164,48 @@ function AccountControl() {
   );
 }
 
+// Last-known plan cache (localStorage) so the nav badge/state shows INSTANTLY on
+// load instead of flickering Free→paid while Firestore is fetched. The cached
+// value is always reconciled with the server value once it arrives.
+const PLAN_CACHE_KEY = 'isatprep_plan';
+function cachedPlan() {
+  try { return localStorage.getItem(PLAN_CACHE_KEY) || null; } catch { return null; }
+}
+function setCachedPlan(plan) {
+  try {
+    if (plan) localStorage.setItem(PLAN_CACHE_KEY, plan);
+    else localStorage.removeItem(PLAN_CACHE_KEY);
+  } catch { /* ignore */ }
+}
+const isPaidPlan = (p) => p === 'core' || p === 'complete';
+
 // -----------------------------------------------------------------------------
 // Shared auth + plan state hook. ONE subscription point used by the whole nav so
 // every page reflects the same signed-in / paid state consistently.
 //   status: 'loading' | 'out' | 'in'
 //   paid:   boolean (plan core/complete). Only meaningful when status==='in'.
+// Seeds from the cached plan so a returning paid user sees their badge with no
+// flicker; reconciles with Firestore on the auth callback.
 // -----------------------------------------------------------------------------
 function useAuthPlan() {
-  const [state, setState] = React.useState(
-    isFirebaseConfigured() ? { status: 'loading', paid: false } : { status: 'out', paid: false }
-  );
+  const [state, setState] = React.useState(() => {
+    if (!isFirebaseConfigured()) return { status: 'out', paid: false };
+    // Optimistic: if we have a cached plan from a prior session, assume still
+    // signed in with that plan until the auth callback confirms/corrects.
+    const cp = cachedPlan();
+    return cp ? { status: 'in', paid: isPaidPlan(cp) } : { status: 'loading', paid: false };
+  });
   React.useEffect(() => {
     if (!isFirebaseConfigured()) return undefined;
     const unsub = onUserChanged(async (u) => {
-      if (!u) { setState({ status: 'out', paid: false }); return; }
-      let paid = false;
+      if (!u) { setCachedPlan(null); setState({ status: 'out', paid: false }); return; }
+      let plan = 'free';
       try {
         const doc = await getUserDoc();
-        const plan = (doc && doc.plan) || 'free';
-        paid = plan === 'core' || plan === 'complete';
-      } catch { /* default unpaid */ }
-      setState({ status: 'in', paid });
+        plan = (doc && doc.plan) || 'free';
+      } catch { /* default free */ }
+      setCachedPlan(plan);
+      setState({ status: 'in', paid: isPaidPlan(plan) });
     });
     return () => unsub();
   }, []);
