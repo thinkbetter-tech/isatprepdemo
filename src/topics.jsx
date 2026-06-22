@@ -7,20 +7,20 @@ import { TierBadge, Pricing, FinalCTA, Footer, NavCta } from './sections.jsx';
 // `available: true` = module has a wired-up free-sample practice page.
 // All modules ship with the same 4-free-question promise per the pricing — once
 // each practice page lands, set `available: true` and add an `href`.
+// All four topics are now practiceable (free sample for everyone, full bank for
+// paid). Each routes to practice.html?topic=<domain-slug>.
 const TOPICS_FULL = [
-  // 01 — Available + practiceable. The free module.
   {
     n: 1,
     name: "Craft and Structure",
     desc: "Vocabulary in context, text structure, and connections across passages.",
     long: "How passages are built and how meaning moves through them. Read for the move, not just the meaning — and the answer falls out.",
-    href: "practice.html",
+    href: "practice.html?topic=craft-and-structure",
     available: true,
-    questions: 100,
   },
-  { n: 2, name: "Information and Ideas",        desc: "Main ideas, details, inferences, and command of evidence.", long: "Find the thesis, hold the details, and pick the right proof — every time." },
-  { n: 3, name: "Expression of Ideas",          desc: "Rhetorical synthesis and transitions.",                     long: "Connect ideas with rhetorical control — the highest-leverage Writing moves, solved methodically." },
-  { n: 4, name: "Standard English Conventions", desc: "Punctuation, grammar, and sentence boundaries.",            long: "Comma, semicolon, colon, dash. Rules — not vibes." },
+  { n: 2, name: "Information and Ideas",        desc: "Main ideas, details, inferences, and command of evidence.", long: "Find the thesis, hold the details, and pick the right proof — every time.", href: "practice.html?topic=information-and-ideas", available: true },
+  { n: 3, name: "Expression of Ideas",          desc: "Rhetorical synthesis and transitions.",                     long: "Connect ideas with rhetorical control — the highest-leverage Writing moves, solved methodically.", href: "practice.html?topic=expression-of-ideas", available: true },
+  { n: 4, name: "Standard English Conventions", desc: "Punctuation, grammar, and sentence boundaries.",            long: "Comma, semicolon, colon, dash. Rules — not vibes.", href: "practice.html?topic=standard-english-conventions", available: true },
 ];
 
 function TopicsNav() {
@@ -64,13 +64,11 @@ function TopicsHero() {
 }
 
 function TopicCard({ t }) {
-  const external = !!t.href;
-  const href = t.href || "signup.html?plan=core";
+  // All topics are practiceable now; same-tab navigation to the practice page.
+  const href = t.href || "practice.html";
   return (
     <a
       href={href}
-      target={external ? "_blank" : undefined}
-      rel={external ? "noopener noreferrer" : undefined}
       className={"topic-card" + (t.available ? " topic-card--free" : "")}
     >
       <div className="topic-card__head">
@@ -113,7 +111,7 @@ function TopicsGrid() {
               <span className="btn btn-primary">
                 Practice 4 free questions <span className="btn-arrow">→</span>
               </span>
-              <span className="topic-feature__meta">{first.questions} questions in this module</span>
+              <span className="topic-feature__meta">Free sample + full bank on upgrade</span>
             </div>
           </div>
           <div className="topic-feature__right" aria-hidden="true">

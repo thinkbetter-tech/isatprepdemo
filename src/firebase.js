@@ -397,6 +397,25 @@ export function onUserChanged(cb) {
 }
 
 /**
+ * Resolves with the user (or null) only AFTER Firebase has restored auth state
+ * from persistence — i.e. the FIRST onAuthStateChanged callback. Use this for
+ * route guards so we never redirect a logged-in user just because the SDK hadn't
+ * finished rehydrating yet (the cause of the "asked to log in again" race).
+ * Resolves null immediately when unconfigured.
+ * @returns {Promise<object|null>}
+ */
+export function whenAuthReady() {
+  if (!isFirebaseConfigured()) return Promise.resolve(null);
+  return getFirebase().then((fb) => new Promise((resolve) => {
+    if (!fb || !_sdk) { resolve(null); return; }
+    const off = _sdk.onAuthStateChanged(auth, (user) => {
+      off(); // we only want the first definitive state
+      resolve(user || null);
+    });
+  }));
+}
+
+/**
  * Returns whether the given uid already has a profile doc. Used by the Google
  * age gate to decide if this is a first-time sign-in (new user).
  */

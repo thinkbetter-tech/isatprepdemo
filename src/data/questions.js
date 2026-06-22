@@ -10,6 +10,11 @@ import craftAndStructure from './questions-craft-and-structure.js';
 import informationAndIdeas from './questions-information-and-ideas.js';
 import expressionOfIdeas from './questions-expression-of-ideas.js';
 import standardEnglishConventions from './questions-standard-english-conventions.js';
+// Batch 2 (ids …-031..060)
+import craftAndStructure2 from './questions-craft-and-structure-2.js';
+import informationAndIdeas2 from './questions-information-and-ideas-2.js';
+import expressionOfIdeas2 from './questions-expression-of-ideas-2.js';
+import standardEnglishConventions2 from './questions-standard-english-conventions-2.js';
 
 // The original 4 questions that shipped in practice.jsx, normalized to the schema
 // (domain craft-and-structure; kept as the free-practice samples).
@@ -100,10 +105,10 @@ export const ORIGINAL_QUESTIONS = [
 // Full bank: generated questions per domain + the original samples.
 export const QUESTIONS = [
   ...ORIGINAL_QUESTIONS,
-  ...craftAndStructure,
-  ...informationAndIdeas,
-  ...expressionOfIdeas,
-  ...standardEnglishConventions,
+  ...craftAndStructure, ...craftAndStructure2,
+  ...informationAndIdeas, ...informationAndIdeas2,
+  ...expressionOfIdeas, ...expressionOfIdeas2,
+  ...standardEnglishConventions, ...standardEnglishConventions2,
 ];
 
 export function questionsByDomain(slug) {

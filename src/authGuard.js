@@ -11,7 +11,7 @@
 //     against locally.)
 // -----------------------------------------------------------------------------
 
-import { isFirebaseConfigured, onUserChanged, signOutUser } from './firebase.js';
+import { isFirebaseConfigured, onUserChanged, whenAuthReady, signOutUser } from './firebase.js';
 
 // Re-export so gated pages can wire a sign-out control without importing two
 // modules. (No UI is added by this guard itself.)
@@ -21,18 +21,19 @@ export { signOutUser };
  * Redirect unauthenticated users to `redirectTo`. Call early in a gated page's
  * entry module.
  *
+ * Uses whenAuthReady() so we wait for Firebase to FINISH restoring auth state
+ * from persistence before deciding — otherwise a signed-in user can be wrongly
+ * bounced to login because the SDK hadn't rehydrated yet (the reported bug).
+ *
  * @param {{ redirectTo?: string }} [opts]
- * @returns {() => void} unsubscribe (no-op when unconfigured)
  */
 export function requireAuth({ redirectTo = 'login.html' } = {}) {
   if (!isFirebaseConfigured()) {
     // Not configured — do nothing so local dev (no env) still shows the page.
-    return () => {};
+    return;
   }
-  return onUserChanged((user) => {
-    if (!user) {
-      window.location.href = redirectTo;
-    }
+  whenAuthReady().then((user) => {
+    if (!user) window.location.href = redirectTo;
   });
 }
 

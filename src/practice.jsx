@@ -3,11 +3,23 @@ import { Footer, AccountControl } from './sections.jsx';
 import { DemoBanner, PreviewNav } from './preview.jsx';
 import {
   trackEvent, recordAnswer, getLessonProgress,
+  onUserChanged, isFirebaseConfigured, getUserDoc,
 } from './firebase.js';
-// Practice page for "Craft and Structure" — 4 unlocked questions + 96 locked.
+import { questionsByDomain, ORIGINAL_QUESTIONS } from './data/questions.js';
+import { DOMAINS, planAllows } from './data/tests.js';
+// Topic practice page. Reads ?topic=<domain-slug>; shows a free sample to
+// everyone and the full question set to paid users.
 
-// Stable lesson id for this module's progress doc (progress/{uid}/lessons/{id}).
-const LESSON_ID = 'craft-and-structure';
+// Number of free sample questions shown to non-paid users per topic.
+const FREE_COUNT = 4;
+
+// Resolve the topic slug from the URL (defaults to craft-and-structure, the
+// original free module). Returns { slug, name }.
+function resolveTopic() {
+  const slug = new URLSearchParams(window.location.search).get('topic');
+  const match = DOMAINS.find((d) => d.slug === slug);
+  return match || DOMAINS[0];
+}
 
 // Module-scoped guard: fire `practice_start` ONCE per page session, the first
 // time a user begins a question (any card), not on every attempt/re-render.
@@ -127,18 +139,20 @@ function PracticeNav() {
   );
 }
 
-function TopicHeader({ unlocked, total }) {
-  const pct = Math.round((unlocked / total) * 100);
+function TopicHeader({ topicName, unlocked, total, paid }) {
+  const pct = total ? Math.round((unlocked / total) * 100) : 0;
   return (
     <section style={{padding:"3.5rem 0 2rem"}}>
       <div className="wrap">
-        <a href="index.html#topics" style={{fontFamily:"var(--mono)", fontSize:12, color:"var(--ink-soft)", letterSpacing:"0.06em", textTransform:"uppercase"}}>← All topics</a>
+        <a href="topics.html" style={{fontFamily:"var(--mono)", fontSize:12, color:"var(--ink-soft)", letterSpacing:"0.06em", textTransform:"uppercase"}}>← All topics</a>
         <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-end", gap:32, marginTop:18, flexWrap:"wrap"}}>
           <div style={{flex:"1 1 480px"}}>
-            <h1 style={{fontSize:"clamp(36px,4.4vw,56px)", lineHeight:1.05}}>Craft and Structure</h1>
+            <h1 style={{fontSize:"clamp(36px,4.4vw,56px)", lineHeight:1.05}}>{topicName}</h1>
             <p className="body-text" style={{marginTop:14, maxWidth:"56ch"}}>
-              Understand how passages are built — claim, evidence, qualifier, transition.
-              Apply the method, predict the answer, eliminate the rest. {unlocked} questions are unlocked for free practice.
+              Apply the method, predict the answer, eliminate the rest.{' '}
+              {paid
+                ? `All ${total} questions are unlocked.`
+                : `${unlocked} of ${total} questions are unlocked for free practice.`}
             </p>
           </div>
           <div className="progress-card">
@@ -147,7 +161,9 @@ function TopicHeader({ unlocked, total }) {
               <span className="progress-label">Questions unlocked</span>
             </div>
             <div className="progress-bar"><div className="progress-fill" style={{width: pct + "%"}}/></div>
-            <a href="index.html#pricing" className="btn btn-primary btn-sm btn-block" style={{marginTop:14}}>Unlock all {total} →</a>
+            {!paid && (
+              <a href="index.html#pricing" className="btn btn-primary btn-sm btn-block" style={{marginTop:14}}>Unlock all {total} →</a>
+            )}
           </div>
         </div>
       </div>
@@ -164,7 +180,7 @@ function LockIcon({size=14}) {
   );
 }
 
-function QuestionCard({ q, idx, savedAnswer }) {
+function QuestionCard({ q, idx, savedAnswer, lessonId }) {
   const [phase, setPhase] = React.useState("idle"); // idle | attempting | submitted | reviewing
   const [pick, setPick] = React.useState(null);
   const [playing, setPlaying] = React.useState(false);
@@ -281,7 +297,7 @@ function QuestionCard({ q, idx, savedAnswer }) {
                   // and which question. No-op until analytics consent is granted.
                   trackEvent('practice_answer_submit', { question_id: q.id, correct });
                   // Persist the answer for resume (no-op when signed out / unconfigured).
-                  recordAnswer(LESSON_ID, q.id, pick, correct);
+                  recordAnswer(lessonId, q.id, pick, correct);
                   setPhase("submitted");
                 }}>
                   Submit answer <span className="btn-arrow">→</span>
@@ -346,9 +362,10 @@ function QuestionCard({ q, idx, savedAnswer }) {
   );
 }
 
-function LockedRail() {
-  // 96 placeholders, in groups of 4
-  const items = Array.from({length: 96}, (_, i) => i + 5);
+function LockedRail({ count = 0 }) {
+  // Show up to ~40 lock tiles representing the locked remainder.
+  const shown = Math.min(count, 40);
+  const items = Array.from({length: shown}, (_, i) => i + FREE_COUNT + 1);
   return (
     <section className="locked-section">
       <div className="wrap">
@@ -356,7 +373,7 @@ function LockedRail() {
           <div>
             <h2>Unlock the full bank.</h2>
             <p className="body-text" style={{maxWidth:"54ch", marginTop:8}}>
-              The free sample is just the start. Unlock 96 more graded practice questions across structure, purpose, and transitions.
+              The free sample is just the start. Unlock {count} more graded practice questions in this topic — and every other topic.
             </p>
           </div>
           <a href="index.html#pricing" className="btn btn-primary btn-lg">Upgrade to unlock <span className="btn-arrow">→</span></a>
@@ -382,21 +399,52 @@ function PracticeApp() {
   const previewN = parseInt(params.get("n"), 10);
   const backN = previewN >= 1 && previewN <= 4 ? previewN : 1;
 
-  // Load saved progress for this lesson once (resume state). `answers` maps
-  // questionId -> { pick, correct }. Empty when signed out / no prior progress.
+  const topic = resolveTopic();
+  const lessonId = topic.slug;
+
+  // The topic's full question set. Craft-and-structure leads with the 4 originals
+  // (the long-standing free samples), then its generated bank; other topics use
+  // their generated bank directly.
+  const topicQuestions = React.useMemo(() => {
+    const generated = questionsByDomain(topic.slug)
+      .filter((q) => q.source !== 'original'); // originals are added explicitly below
+    if (topic.slug === 'craft-and-structure') {
+      return [...ORIGINAL_QUESTIONS, ...generated];
+    }
+    return generated;
+  }, [topic.slug]);
+
+  // Plan gating: paid users see all questions; others see the free sample only.
+  const [paid, setPaid] = React.useState(false);
+  const [planResolved, setPlanResolved] = React.useState(!isFirebaseConfigured());
+  React.useEffect(() => {
+    if (!isFirebaseConfigured()) { setPaid(false); setPlanResolved(true); return undefined; }
+    const unsub = onUserChanged(async (u) => {
+      if (!u) { setPaid(false); setPlanResolved(true); return; }
+      const doc = await getUserDoc();
+      setPaid(planAllows((doc && doc.plan) || 'free', 'core'));
+      setPlanResolved(true);
+    });
+    return () => unsub();
+  }, []);
+
+  const total = topicQuestions.length;
+  const visible = paid ? topicQuestions : topicQuestions.slice(0, FREE_COUNT);
+  const lockedCount = Math.max(0, total - visible.length);
+
+  // Load saved progress for this lesson (resume state).
   const [answers, setAnswers] = React.useState(null);
   React.useEffect(() => {
     let alive = true;
-    // Don't resume in the preview/demo flow — that's a marketing walkthrough.
     if (fromPreview) return undefined;
-    getLessonProgress(LESSON_ID).then((doc) => {
+    getLessonProgress(lessonId).then((doc) => {
       if (alive && doc && doc.answers) setAnswers(doc.answers);
     });
     return () => { alive = false; };
-  }, [fromPreview]);
+  }, [fromPreview, lessonId]);
 
   return (
-    <div data-screen-label="Practice · Craft and Structure">
+    <div data-screen-label={"Practice · " + topic.name}>
       {fromPreview && <DemoBanner plan={previewPlan} />}
       {fromPreview ? <PreviewNav plan={previewPlan} /> : <PracticeNav />}
       {fromPreview && (
@@ -406,18 +454,18 @@ function PracticeApp() {
           </a>
         </div>
       )}
-      <TopicHeader unlocked={4} total={100}/>
+      <TopicHeader topicName={topic.name} unlocked={visible.length} total={total} paid={paid} />
       <section style={{padding:"1rem 0 5rem"}}>
         <div className="wrap" style={{maxWidth:980}}>
           <div className="qlist">
-            {QUESTIONS.map((q, i) => (
-              <QuestionCard key={q.id} q={q} idx={i}
+            {visible.map((q, i) => (
+              <QuestionCard key={q.id} q={q} idx={i} lessonId={lessonId}
                 savedAnswer={answers ? answers[String(q.id)] : null} />
             ))}
           </div>
         </div>
       </section>
-      <LockedRail/>
+      {planResolved && !paid && lockedCount > 0 && <LockedRail count={lockedCount} />}
       <Footer/>
     </div>
   );
