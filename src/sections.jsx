@@ -1,3 +1,5 @@
+import React from 'react';
+import { Check, NoCheck, ArrowRight, Plus, PlayIcon, GlyphRead, GlyphFormula, GlyphEliminate, HeroDiagram } from './icons.jsx';
 // iSATPrep — page sections
 
 const TESTIMONIALS = [
@@ -31,9 +33,17 @@ function TierBadge({ available }) {
   return <span className="badge">100 questions · 4 free</span>;
 }
 
+// Keyboard/screen-reader skip link: first focusable element on the page, jumps
+// past the nav straight to main content (WCAG 2.4.1). Visually hidden until
+// focused (see .skip-link in styles.css).
+function SkipLink() {
+  return <a href="#top" className="skip-link">Skip to main content</a>;
+}
+
 function Nav({ onOpenDemo }) {
   return (
     <nav className="nav">
+      <SkipLink />
       <div className="wrap nav-inner">
         <a href="#top" className="brand">
           <span className="brand-mark">i</span>
@@ -414,7 +424,8 @@ function Footer() {
             <h4>Contact</h4>
             <a href="mailto:hello@isatprep.net">hello@isatprep.net</a>
             <a href="https://www.linkedin.com/in/shipra-batra-40aa99275/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href="#">Instagram</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
           </div>
         </div>
         <div className="foot-bottom">
@@ -427,16 +438,21 @@ function Footer() {
 }
 
 function VideoModal({ open, onClose, url }) {
-  if (!open) return null;
+  // Hooks must run unconditionally (Rules of Hooks) — guard inside the effect,
+  // not via an early return placed before the hook.
   React.useEffect(() => {
+    if (!open) return undefined;
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e)=>e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>ESC · close ✕</button>
+      <div className="modal" onClick={(e)=>e.stopPropagation()} role="dialog" aria-modal="true" aria-label="iSATPrep demo video">
+        <button className="modal-close" onClick={onClose} aria-label="Close demo video (press Escape)">ESC · close ✕</button>
         <iframe
           src={url}
           width="100%" height="100%" frameBorder="0" allow="autoplay; encrypted-media"
@@ -450,3 +466,5 @@ function VideoModal({ open, onClose, url }) {
 }
 
 Object.assign(window, { Nav, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge });
+
+export { Nav, Hero, Problem, Method, Demo, Instructor, Topics, TopicsCTA, Testimonials, Pricing, FAQ, FinalCTA, Footer, VideoModal, TierBadge };

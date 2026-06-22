@@ -1,3 +1,4 @@
+import React from 'react';
 // Shared SVG icons, glyphs, and the hero diagram for iSATPrep.
 
 const Check = ({color="#0F1E3D"}) => (
@@ -148,3 +149,5 @@ const HeroDiagram = () => (
 );
 
 Object.assign(window, { Check, NoCheck, ArrowRight, Plus, PlayIcon, GlyphRead, GlyphFormula, GlyphEliminate, HeroDiagram });
+
+export { Check, NoCheck, ArrowRight, Plus, PlayIcon, GlyphRead, GlyphFormula, GlyphEliminate, HeroDiagram };

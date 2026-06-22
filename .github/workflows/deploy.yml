@@ -1,0 +1,98 @@
+# Deploy iSATPrep to Firebase Hosting on push to main.
+#
+# Auth is KEYLESS via Workload Identity Federation (WIF) — no long-lived service
+# account JSON keys, mirroring investment_agent's approach (see
+# investment_agent/infra/terraform/envs/dev/wif.tf). The federated GitHub OIDC
+# token is exchanged for short-lived GCP credentials for a deployer service
+# account that holds the Firebase Hosting deploy role.
+#
+# ============================ TODO BEFORE FIRST RUN ===========================
+# Fill these in after running infra/bootstrap-isatprep.sh and creating the WIF
+# resources + deployer SA. Store them as repo VARIABLES (non-secret) and SECRETS
+# (sensitive) under: GitHub repo → Settings → Secrets and variables → Actions.
+#
+#   Repo VARIABLES (vars.*):
+#     GCP_PROJECT_ID              = isatprep-prod
+#     GCP_WIF_PROVIDER            = projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/<POOL_ID>/providers/<PROVIDER_ID>
+#     GCP_DEPLOYER_SA             = <deployer-sa-name>@isatprep-prod.iam.gserviceaccount.com
+#
+#   Repo SECRETS (secrets.*) — the Vite Firebase web config (from the console):
+#     VITE_FIREBASE_API_KEY
+#     VITE_FIREBASE_AUTH_DOMAIN
+#     VITE_FIREBASE_PROJECT_ID
+#     VITE_FIREBASE_STORAGE_BUCKET
+#     VITE_FIREBASE_APP_ID
+#     VITE_GA_MEASUREMENT_ID
+#
+# NOTE: the WIF provider's attribute_condition must trust THIS repo
+#       (assertion.repository == "<owner>/<repo>"). The repo slug is unknown at
+#       authoring time — set it when you create the WIF resources. TODO: confirm
+#       the GitHub repo slug (owner/name) and bind the deployer SA to it.
+# ==============================================================================
+
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Required for WIF: the job mints a GitHub OIDC token.
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-hosting-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & deploy (prod)
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (Vite → dist/)
+        run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
+
+      # Keyless auth: exchange the GitHub OIDC token for GCP credentials.
+      - name: Authenticate to Google Cloud (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          # TODO: fill from repo variables (see header).
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      # Deploy ONLY hosting. Firestore/Storage rules and (Stage 2) functions are
+      # deployed deliberately/out-of-band, not on every push.
+      - name: Deploy to Firebase Hosting
+        run: |
+          npx --yes firebase-tools@latest deploy \
+            --only hosting \
+            --project "${{ vars.GCP_PROJECT_ID }}" \
+            --non-interactive

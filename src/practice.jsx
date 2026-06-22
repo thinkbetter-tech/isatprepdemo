@@ -1,4 +1,24 @@
+import React from 'react';
+import { Footer } from './sections.jsx';
+import { DemoBanner, PreviewNav } from './preview.jsx';
+import {
+  trackEvent, onUserChanged, signOutUser, deleteAccount,
+  isFirebaseConfigured, recordAnswer, getLessonProgress,
+} from './firebase.js';
 // Practice page for "Craft and Structure" — 4 unlocked questions + 96 locked.
+
+// Stable lesson id for this module's progress doc (progress/{uid}/lessons/{id}).
+const LESSON_ID = 'craft-and-structure';
+
+// Module-scoped guard: fire `practice_start` ONCE per page session, the first
+// time a user begins a question (any card), not on every attempt/re-render.
+// trackEvent() is a safe no-op until analytics consent is granted.
+let practiceStartFired = false;
+function firePracticeStart() {
+  if (practiceStartFired) return;
+  practiceStartFired = true;
+  trackEvent('practice_start');
+}
 
 const QUESTIONS = [
   {
@@ -84,6 +104,97 @@ const QUESTIONS = [
 
 // ============================================================
 
+// Account control: shows the signed-in user's email, sign-out, and the
+// account/data deletion path (US privacy compliance). Renders nothing when
+// Firebase is unconfigured (local/no-env) or no user is signed in.
+function AccountControl() {
+  const [user, setUser] = React.useState(null);
+  const [open, setOpen] = React.useState(false);
+  const [confirming, setConfirming] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!isFirebaseConfigured()) return undefined;
+    const unsub = onUserChanged((u) => setUser(u));
+    return () => unsub();
+  }, []);
+
+  if (!user) return null;
+
+  const onSignOut = async () => {
+    try { await signOutUser(); window.location.href = 'index.html'; }
+    catch { /* ignore */ }
+  };
+
+  const onDelete = async () => {
+    setBusy(true); setErr(null);
+    try {
+      await deleteAccount();
+      window.location.href = 'index.html';
+    } catch (e) {
+      setBusy(false);
+      if (e && e.code === 'auth/requires-recent-login') {
+        setErr('For your security, please log in again, then retry deletion.');
+      } else if (e && e.code === 'auth/popup-closed-by-user') {
+        setErr('Re-authentication was cancelled. Account not deleted.');
+      } else {
+        setErr('Could not delete the account. Please try again or contact hello@isatprep.net.');
+      }
+    }
+  };
+
+  return (
+    <div className="acct">
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm acct-toggle"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {user.displayName || user.email || 'Account'} ▾
+      </button>
+      {open && (
+        <div className="acct-menu" role="menu" aria-label="Account">
+          <button type="button" role="menuitem" className="acct-item" onClick={onSignOut}>
+            Sign out
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="acct-item acct-item-danger"
+            onClick={() => setConfirming(true)}
+          >
+            Delete account
+          </button>
+        </div>
+      )}
+
+      {confirming && (
+        <div className="acct-backdrop" role="dialog" aria-modal="true" aria-labelledby="del-title" onClick={() => !busy && setConfirming(false)}>
+          <div className="acct-dialog" onClick={(e) => e.stopPropagation()}>
+            <h2 id="del-title" className="serif">Delete your account?</h2>
+            <p>
+              This permanently deletes your account and all associated data
+              (profile and saved progress). This cannot be undone.
+            </p>
+            {err && <p className="acct-err" role="alert">{err}</p>}
+            <div className="acct-dialog-actions">
+              <button type="button" className="btn btn-outline" disabled={busy} onClick={() => setConfirming(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" disabled={busy} onClick={onDelete}>
+                {busy ? 'Deleting…' : 'Delete permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PracticeNav() {
   return (
     <nav className="nav">
@@ -98,6 +209,7 @@ function PracticeNav() {
           <a href="index.html#faq">FAQ</a>
         </div>
         <div className="nav-cta">
+          <AccountControl />
           <a href="index.html" className="btn btn-ghost btn-sm">← Back to home</a>
           <a href="index.html#pricing" className="btn btn-primary btn-sm">Upgrade</a>
         </div>
@@ -143,12 +255,22 @@ function LockIcon({size=14}) {
   );
 }
 
-function QuestionCard({ q, idx }) {
+function QuestionCard({ q, idx, savedAnswer }) {
   const [phase, setPhase] = React.useState("idle"); // idle | attempting | submitted | reviewing
   const [pick, setPick] = React.useState(null);
   const [playing, setPlaying] = React.useState(false);
   const [audioErr, setAudioErr] = React.useState(false);
   const audioRef = React.useRef(null);
+
+  // Restore a previously-saved answer once progress loads (resume state).
+  React.useEffect(() => {
+    if (savedAnswer && savedAnswer.pick && phase === "idle") {
+      setPick(savedAnswer.pick);
+      setPhase("submitted");
+    }
+    // Only when the saved answer first arrives; user interaction takes over after.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedAnswer]);
 
   const correct = pick === q.answer;
   const passageParas = q.passage.split("\n\n");
@@ -194,7 +316,7 @@ function QuestionCard({ q, idx }) {
           <p className="qcard-preview">
             {passageParas[0].slice(0, 180)}{passageParas[0].length > 180 ? "…" : ""}
           </p>
-          <button className="btn btn-primary btn-lg" onClick={() => setPhase("attempting")}>
+          <button className="btn btn-primary btn-lg" onClick={() => { firePracticeStart(); setPhase("attempting"); }}>
             Attempt question <span className="btn-arrow">→</span>
           </button>
         </div>
@@ -245,7 +367,14 @@ function QuestionCard({ q, idx }) {
             {phase === "attempting" && (
               <div className="qcard-actions">
                 <button className="btn btn-outline" onClick={() => { setPick(null); setPhase("idle"); }}>Cancel</button>
-                <button className="btn btn-primary" disabled={!pick} onClick={() => setPhase("submitted")}>
+                <button className="btn btn-primary" disabled={!pick} onClick={() => {
+                  // Funnel signal: an answer was submitted, with whether it was correct
+                  // and which question. No-op until analytics consent is granted.
+                  trackEvent('practice_answer_submit', { question_id: q.id, correct });
+                  // Persist the answer for resume (no-op when signed out / unconfigured).
+                  recordAnswer(LESSON_ID, q.id, pick, correct);
+                  setPhase("submitted");
+                }}>
                   Submit answer <span className="btn-arrow">→</span>
                 </button>
               </div>
@@ -344,6 +473,19 @@ function PracticeApp() {
   const previewN = parseInt(params.get("n"), 10);
   const backN = previewN >= 1 && previewN <= 4 ? previewN : 1;
 
+  // Load saved progress for this lesson once (resume state). `answers` maps
+  // questionId -> { pick, correct }. Empty when signed out / no prior progress.
+  const [answers, setAnswers] = React.useState(null);
+  React.useEffect(() => {
+    let alive = true;
+    // Don't resume in the preview/demo flow — that's a marketing walkthrough.
+    if (fromPreview) return undefined;
+    getLessonProgress(LESSON_ID).then((doc) => {
+      if (alive && doc && doc.answers) setAnswers(doc.answers);
+    });
+    return () => { alive = false; };
+  }, [fromPreview]);
+
   return (
     <div data-screen-label="Practice · Craft and Structure">
       {fromPreview && <DemoBanner plan={previewPlan} />}
@@ -359,7 +501,10 @@ function PracticeApp() {
       <section style={{padding:"1rem 0 5rem"}}>
         <div className="wrap" style={{maxWidth:980}}>
           <div className="qlist">
-            {QUESTIONS.map((q, i) => <QuestionCard key={q.id} q={q} idx={i}/>)}
+            {QUESTIONS.map((q, i) => (
+              <QuestionCard key={q.id} q={q} idx={i}
+                savedAnswer={answers ? answers[String(q.id)] : null} />
+            ))}
           </div>
         </div>
       </section>
@@ -370,3 +515,5 @@ function PracticeApp() {
 }
 
 Object.assign(window, { PracticeApp });
+
+export { PracticeApp };

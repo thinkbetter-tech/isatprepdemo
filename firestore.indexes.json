@@ -1,0 +1,5 @@
+{
+  "//": "Composite indexes are added here as queries are written (Stage 2: video catalog filters by domain/topic/requiredPlan, progress lookups, etc.). Single-field indexes are automatic in Firestore and need no entry. Deploy with: firebase deploy --only firestore:indexes",
+  "indexes": [],
+  "fieldOverrides": []
+}

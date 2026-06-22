@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "isatprep-prod",
+    "prod": "isatprep-prod",
+    "staging": "isatprep-staging"
+  }
+}
