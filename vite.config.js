@@ -44,6 +44,10 @@ function copyStaticAssets() {
 export default defineConfig({
   root: '.',
   plugins: [react(), copyStaticAssets()],
+  // `@` → src, used by the ported AI Classroom components (e.g. '@/lib/math').
+  resolve: {
+    alias: { '@': resolve(__dirname, 'src') },
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -54,6 +58,8 @@ export default defineConfig({
         signup: resolve(__dirname, 'signup.html'),
         topics: resolve(__dirname, 'topics.html'),
         practice: resolve(__dirname, 'practice.html'),
+        explain: resolve(__dirname, 'explain.html'),
+        classroom: resolve(__dirname, 'classroom.html'),
         account: resolve(__dirname, 'account.html'),
         tests: resolve(__dirname, 'tests.html'),
         test: resolve(__dirname, 'test.html'),

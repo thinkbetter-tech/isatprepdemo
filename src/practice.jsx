@@ -31,6 +31,25 @@ function firePracticeStart() {
   trackEvent('practice_start');
 }
 
+// Open the AI Classroom pre-loaded with this question. We stash a plain-text
+// brief in sessionStorage (passages are too long for a URL) and the classroom
+// auto-sends it to the tutor once the lesson connects.
+const CLASSROOM_SEED_KEY = 'isatprep:classroom-seed';
+function askTutorAboutQuestion(q) {
+  const passage = (q.passage || '').replace(/\|\|/g, '');
+  const choices = (q.choices || []).map((c) => `${c.k}. ${c.text}`).join('\n');
+  const seed =
+    `I'm working on an SAT Reading & Writing practice question and I'd like to understand it.\n\n` +
+    `Passage:\n${passage}\n\n` +
+    `Question: ${q.prompt}\n\n` +
+    `Choices:\n${choices}\n\n` +
+    `The correct answer is ${q.answer}. Walk me through how to approach this with the method, ` +
+    `and explain why ${q.answer} is right and the others are wrong.`;
+  try { sessionStorage.setItem(CLASSROOM_SEED_KEY, seed); } catch (e) { /* ignore */ }
+  trackEvent('classroom_ask_from_practice', { question_id: q.id });
+  window.location.href = 'classroom.html';
+}
+
 const QUESTIONS = [
   {
     id: 1,
@@ -163,9 +182,6 @@ function LockIcon({size=14}) {
 function QuestionCard({ q, idx, savedAnswer, lessonId }) {
   const [phase, setPhase] = React.useState("idle"); // idle | attempting | submitted | reviewing
   const [pick, setPick] = React.useState(null);
-  const [playing, setPlaying] = React.useState(false);
-  const [audioErr, setAudioErr] = React.useState(false);
-  const audioRef = React.useRef(null);
 
   // Restore a previously-saved answer once progress loads (resume state).
   React.useEffect(() => {
@@ -180,27 +196,10 @@ function QuestionCard({ q, idx, savedAnswer, lessonId }) {
   const correct = pick === q.answer;
   const passageParas = q.passage.split("\n\n");
 
-  const audioSrc = `audio/q${q.id}.mp3`;
-
-  const togglePlay = () => {
-    const a = audioRef.current;
-    if (!a) return;
-    setAudioErr(false);
-    if (a.paused) {
-      const p = a.play();
-      if (p && p.catch) {
-        p.catch((err) => {
-          // NotAllowedError = user gesture / autoplay block; ignore — they clicked, so it should work next try
-          if (err && err.name !== "AbortError") {
-            console.warn("audio play error:", err);
-            setAudioErr(true);
-          }
-        });
-      }
-    } else {
-      a.pause();
-    }
-  };
+  // The 4 free "original" questions (ids orig-1 … orig-4) have an animated,
+  // voiced walkthrough at explain.html?q=N. Derive N; null for other questions.
+  const explainMatch = /^orig-(\d+)$/.exec(q.id);
+  const explainNum = explainMatch ? Number(explainMatch[1]) : null;
 
   return (
     <article className={"qcard " + (phase==="reviewing" ? "qcard-review" : "")}>
@@ -310,30 +309,16 @@ function QuestionCard({ q, idx, savedAnswer, lessonId }) {
               </div>
 
               <div className="explain-actions">
-                <button className="btn btn-ghost btn-sm" onClick={() => { setPick(null); setPhase("idle"); if(audioRef.current){audioRef.current.pause(); audioRef.current.currentTime=0;} setPlaying(false); }}>Close</button>
-                <button className="btn btn-primary btn-sm" onClick={togglePlay}>
-                  {playing ? (
-                    <><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect x="2" y="2" width="3" height="8" rx="0.5"/><rect x="7" y="2" width="3" height="8" rx="0.5"/></svg> Pause audio</>
-                  ) : (
-                    <><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M3 2L10 6L3 10V2Z"/></svg> Explain it further</>
-                  )}
+                <button className="btn btn-ghost btn-sm" onClick={() => { setPick(null); setPhase("idle"); }}>Close</button>
+                <button className="btn btn-outline btn-sm" onClick={() => askTutorAboutQuestion(q)}>
+                  Ask the AI tutor <span className="btn-arrow">→</span>
                 </button>
+                {explainNum && (
+                  <a className="btn btn-primary btn-sm" href={`explain.html?q=${explainNum}`}>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M3 2L10 6L3 10V2Z"/></svg> Watch the explanation
+                  </a>
+                )}
               </div>
-
-              <audio
-                ref={audioRef}
-                src={audioSrc}
-                preload="none"
-                onPlay={() => setPlaying(true)}
-                onPause={() => setPlaying(false)}
-                onEnded={() => setPlaying(false)}
-                style={{display:"none"}}
-              />
-              {audioErr && (
-                <p style={{fontFamily:"var(--mono)", fontSize:11, color:"var(--ink-soft)", letterSpacing:"0.04em", marginTop:8, marginBottom:0}}>
-                  ⓘ Audio could not be played. Please try again.
-                </p>
-              )}
             </div>
           )}
         </div>

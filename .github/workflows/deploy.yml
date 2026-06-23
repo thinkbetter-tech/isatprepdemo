@@ -15,6 +15,7 @@
 #     GCP_PROJECT_ID              = isatprep-prod
 #     GCP_WIF_PROVIDER            = projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/<POOL_ID>/providers/<PROVIDER_ID>
 #     GCP_DEPLOYER_SA             = <deployer-sa-name>@isatprep-prod.iam.gserviceaccount.com
+#     VITE_CLASSROOM_BACKEND_URL  = https://padhai247-backend-75x2oussba-el.a.run.app  (AI Classroom backend)
 #
 #   Repo SECRETS (secrets.*) — the Vite Firebase web config (from the console):
 #     VITE_FIREBASE_API_KEY
@@ -74,6 +75,10 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
+          # AI Classroom backend (public Cloud Run URL — not a secret, so a repo
+          # variable). Baked into the static build; without it the classroom
+          # can't reach the voice/board backend in production.
+          VITE_CLASSROOM_BACKEND_URL: ${{ vars.VITE_CLASSROOM_BACKEND_URL }}
 
       # Keyless auth: exchange the GitHub OIDC token for GCP credentials.
       - name: Authenticate to Google Cloud (WIF)

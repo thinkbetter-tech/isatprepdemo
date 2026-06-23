@@ -1,0 +1,54 @@
+/* AI Classroom styles — Tailwind (scoped to the classroom page only) plus the
+   blackboard element entrance animations ported from the source project.
+   Imported by entry-classroom.tsx, so none of this touches the marketing site. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================
+   Blackboard Element Animations
+   ================================ */
+
+/* ---- Chalk / ink writing reveal ----
+   Clips content left-to-right, simulating the tutor writing it on. */
+@keyframes chalkRevealClip {
+  0%   { clip-path: inset(0 100% 0 0); opacity: 0.7; }
+  5%   { opacity: 1; }
+  100% { clip-path: inset(0 0% 0 0); opacity: 1; }
+}
+
+.bb-chalk-reveal {
+  animation: chalkRevealClip 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  clip-path: inset(0 100% 0 0);
+}
+
+/* ---- Stroke draw ---- For lines/arrows: draws the path progressively. */
+@keyframes strokeDraw {
+  0%   { stroke-dashoffset: var(--path-length, 1000); opacity: 0.7; }
+  5%   { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+.bb-stroke-draw line,
+.bb-stroke-draw path,
+.bb-stroke-draw polyline {
+  stroke-dasharray: var(--path-length, 1000);
+  stroke-dashoffset: var(--path-length, 1000);
+  animation: strokeDraw 0.8s ease-out forwards;
+}
+
+/* Legacy fallback kept for any code still referencing it. */
+.bb-element-enter {
+  animation: chalkRevealClip 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  clip-path: inset(0 100% 0 0);
+}
+
+/* Staggered delays for derivation steps. */
+.bb-derivation-step-0 { animation-delay: 0ms; }
+.bb-derivation-step-1 { animation-delay: 300ms; }
+.bb-derivation-step-2 { animation-delay: 600ms; }
+.bb-derivation-step-3 { animation-delay: 900ms; }
+.bb-derivation-step-4 { animation-delay: 1200ms; }
+.bb-derivation-step-5 { animation-delay: 1500ms; }
+.bb-derivation-step-6 { animation-delay: 1800ms; }
+.bb-derivation-step-7 { animation-delay: 2100ms; }

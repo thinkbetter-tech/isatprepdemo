@@ -258,6 +258,8 @@ function SiteNav({ onIndex = false, current } = {}) {
           <a href={home('method')}>Method</a>
           <a href="topics.html" aria-current={current === 'topics' ? 'page' : undefined}>Topics</a>
           <a href="tests.html" aria-current={current === 'tests' ? 'page' : undefined}>Mock Tests</a>
+          {/* AI Classroom is a paid feature — surface it only to paid users. */}
+          {isPaid && <a href="classroom.html" aria-current={current === 'classroom' ? 'page' : undefined}>Classroom</a>}
           <a href={home('instructor')}>About</a>
           {/* Pricing only matters to people who can still buy: signed-out or unpaid. */}
           {!isPaid && <a href={home('pricing')}>Pricing</a>}
