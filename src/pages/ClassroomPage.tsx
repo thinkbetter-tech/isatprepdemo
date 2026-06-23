@@ -3,6 +3,8 @@
 // as PracticeApp), and only then mounts the live VoiceBlackboard.
 import React from 'react';
 import { VoiceBlackboard } from '../components/VoiceBlackboard';
+// @ts-ignore - JS module without declarations
+import { SiteNav } from '../sections.jsx';
 // firebase.js is plain JS (no types) — imported for side-effect-free helpers.
 // @ts-ignore - JS module without declarations
 import { onUserChanged, isFirebaseConfigured, getUserDoc } from '../firebase.js';
@@ -81,14 +83,17 @@ export function ClassroomPage() {
   }
 
   return (
-    <div className="h-screen bg-background">
-      <VoiceBlackboard
-        studentId={studentId}
-        targetExam="sat"
-        languageCode="en-US"
-        initialPrompt={seedPrompt}
-        className="h-full"
-      />
+    <div className="h-screen flex flex-col bg-background">
+      <SiteNav current="classroom" />
+      <div className="flex-1 min-h-0">
+        <VoiceBlackboard
+          studentId={studentId}
+          targetExam="sat"
+          languageCode="en-US"
+          initialPrompt={seedPrompt}
+          className="h-full"
+        />
+      </div>
     </div>
   );
 }

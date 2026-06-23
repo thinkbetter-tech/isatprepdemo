@@ -2616,21 +2616,21 @@ export const BlackboardCanvas: React.FC<BlackboardCanvasProps> = ({
         height: '100%',
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: '14px',
-        // Soft paper shadow (replaces the heavy chalkboard drop shadow).
-        boxShadow: '0 1px 2px rgba(15,23,42,0.05), 0 8px 24px -12px rgba(15,23,42,0.18)',
+        borderRadius: '8px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.1)',
         backgroundColor: boardColor,
       }}
     >
-      {/* Paper edge — a thin warm hairline instead of the wooden frame. */}
+      {/* Wooden frame — brown border around the board (matches Padhai247). */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          border: '1px solid #E5E2D8',
-          borderRadius: '14px',
+          border: '12px solid #5D4037',
+          borderRadius: '8px',
           pointerEvents: 'none',
           zIndex: 10,
+          boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)',
         }}
       />
 
