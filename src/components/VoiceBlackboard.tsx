@@ -883,7 +883,7 @@ export const VoiceBlackboard: React.FC<VoiceBlackboardProps> = ({
             <BlackboardCanvas
               width={BOARD_WIDTH}
               height={boardHeight}
-              boardColor="#FAFAF7"
+              boardColor="#1a472a"
               showGrid={false}
               externalElements={blackboard.elements}
               externalPointer={blackboard.pointer}

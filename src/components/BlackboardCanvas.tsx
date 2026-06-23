@@ -48,7 +48,7 @@ const BOARD_COLORS = {
 };
 
 const CHALK_COLORS = {
-  white: '#152647',   // default "ink" → navy
+  white: '#FAFAF7',   // default "ink" → navy
   yellow: '#F59E0B',  // emphasis → amber (the single accent)
   pink: '#C97A05',    // amber-deep
   blue: '#2584B2',    // info
@@ -475,7 +475,7 @@ const GraphPlot: React.FC<{
             y1={y}
             x2={gx}
             y2={y + height}
-            stroke="#15264722"
+            stroke="#FAFAF722"
             strokeWidth={1}
           />
         );
@@ -491,7 +491,7 @@ const GraphPlot: React.FC<{
             y1={gy}
             x2={x + width}
             y2={gy}
-            stroke="#15264722"
+            stroke="#FAFAF722"
             strokeWidth={1}
           />
         );
@@ -519,7 +519,7 @@ const GraphPlot: React.FC<{
             y1={originY}
             x2={x + width}
             y2={originY}
-            stroke="#152647"
+            stroke="#FAFAF7"
             strokeWidth={2}
             style={{ filter: 'url(#chalk)' }}
           />
@@ -529,7 +529,7 @@ const GraphPlot: React.FC<{
             y1={y}
             x2={originX}
             y2={y + height}
-            stroke="#152647"
+            stroke="#FAFAF7"
             strokeWidth={2}
             style={{ filter: 'url(#chalk)' }}
           />
@@ -537,7 +537,7 @@ const GraphPlot: React.FC<{
           <text
             x={x + width + 10}
             y={originY + 5}
-            fill="#152647"
+            fill="#FAFAF7"
             fontSize={18}
             fontFamily={CHALK_FONT}
           >
@@ -547,7 +547,7 @@ const GraphPlot: React.FC<{
           <text
             x={originX + 5}
             y={y - 10}
-            fill="#152647"
+            fill="#FAFAF7"
             fontSize={18}
             fontFamily={CHALK_FONT}
           >
@@ -572,7 +572,7 @@ const GraphPlot: React.FC<{
         <text
           x={x + width / 2}
           y={y - 15}
-          fill="#152647"
+          fill="#FAFAF7"
           fontSize={22}
           fontFamily={CHALK_FONT}
           fontWeight={500}
@@ -604,7 +604,7 @@ const DiagramRenderer: React.FC<{
     tension: '#2584B2',    // Blue for tension
     applied: '#C97A05',    // Pink for applied force
     spring: '#F59E0B',     // Yellow for spring force
-    default: '#152647',    // White for unknown
+    default: '#FAFAF7',    // White for unknown
   };
 
   const getForceColor = (forceType: string): string => {
@@ -628,7 +628,7 @@ const DiagramRenderer: React.FC<{
         <text
           x={x + width / 2}
           y={y + 15}
-          fill="#152647"
+          fill="#FAFAF7"
           fontSize={18}
           fontFamily={CHALK_FONT}
           textAnchor="middle"
@@ -643,7 +643,7 @@ const DiagramRenderer: React.FC<{
           y={centerY - blockSize / 2}
           width={blockSize}
           height={blockSize}
-          stroke="#152647"
+          stroke="#FAFAF7"
           strokeWidth={2}
           fill="none"
           style={{ filter: 'url(#chalk)' }}
@@ -653,7 +653,7 @@ const DiagramRenderer: React.FC<{
         <text
           x={centerX}
           y={centerY + 5}
-          fill="#152647"
+          fill="#FAFAF7"
           fontSize={16}
           fontFamily={CHALK_FONT}
           textAnchor="middle"
@@ -843,7 +843,7 @@ const DiagramRenderer: React.FC<{
         <text
           x={x + width / 2}
           y={y + 20}
-          fill="#152647"
+          fill="#FAFAF7"
           fontSize={16}
           fontFamily={CHALK_FONT}
           textAnchor="middle"
@@ -918,7 +918,7 @@ const DiagramRenderer: React.FC<{
               cx={centerX}
               cy={centerY}
               r={8}
-              fill="#152647"
+              fill="#FAFAF7"
               style={{ filter: 'url(#chalk)' }}
             />
 
@@ -1626,7 +1626,7 @@ const SectionBox: React.FC<{
         y={y}
         width={width}
         height={height}
-        stroke={element.borderColor || '#15264744'}
+        stroke={element.borderColor || '#FAFAF744'}
         strokeWidth={1}
         strokeDasharray="8,4"
         fill={element.backgroundColor || 'transparent'}
@@ -1634,7 +1634,7 @@ const SectionBox: React.FC<{
       <text
         x={x + 10}
         y={y - 8}
-        fill="#15264788"
+        fill="#FAFAF788"
         fontSize={16}
         fontFamily={CHALK_FONT}
         fontStyle="italic"
@@ -1722,7 +1722,7 @@ const Pointer: React.FC<{
             y={y - 20}
             width={8}
             height={20}
-            fill="#152647"
+            fill="#FAFAF7"
             rx={2}
             transform={`rotate(-30, ${x}, ${y})`}
             style={{ filter: 'url(#chalk)' }}
@@ -2577,7 +2577,7 @@ export const BlackboardCanvas: React.FC<BlackboardCanvasProps> = ({
           y1={0}
           x2={x}
           y2={height}
-          stroke="#15264711"
+          stroke="#FAFAF711"
           strokeWidth={1}
         />
       );
@@ -2592,7 +2592,7 @@ export const BlackboardCanvas: React.FC<BlackboardCanvasProps> = ({
           y1={y}
           x2={width}
           y2={y}
-          stroke="#15264711"
+          stroke="#FAFAF711"
           strokeWidth={1}
         />
       );
@@ -2680,9 +2680,9 @@ export const BlackboardCanvas: React.FC<BlackboardCanvasProps> = ({
           {/* Board texture gradient */}
           <pattern id="boardTexture" patternUnits="userSpaceOnUse" width="100" height="100">
             <rect width="100" height="100" fill={boardColor} />
-            <circle cx="20" cy="30" r="1" fill="#15264705" />
-            <circle cx="70" cy="60" r="0.5" fill="#15264705" />
-            <circle cx="45" cy="85" r="0.8" fill="#15264705" />
+            <circle cx="20" cy="30" r="1" fill="#FAFAF705" />
+            <circle cx="70" cy="60" r="0.5" fill="#FAFAF705" />
+            <circle cx="45" cy="85" r="0.8" fill="#FAFAF705" />
           </pattern>
         </defs>
 
